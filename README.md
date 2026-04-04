@@ -32,7 +32,7 @@ Supported event types:
 Clone and enter the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/NeuroInfoAPI/NIA-WS-TestServer
 cd NIA-WS-TestServer
 ```
 
