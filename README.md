@@ -27,7 +27,7 @@ Supported event types:
 ## 1) Prepare this repository
 
 **Requirements**:
-- Bun installed
+- [Bun](https://bun.sh/) installed
 
 Clone and enter the repository:
 
