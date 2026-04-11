@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NIA Mock Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/ui/style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <!-- ─── Sidebar ─── -->
+      <aside class="rail">
+        <div class="rail-brand">
+          <div class="brand-mark">N</div>
+          <div>
+            <h1>NIA Mock</h1>
+            <span class="rail-sub">Local test server</span>
+          </div>
+        </div>
+
+        <div class="rail-status">
+          <div class="pill" id="healthPill">
+            <span class="dot"></span>
+            <span id="health">...</span>
+          </div>
+          <div class="pill ws-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M4.5 16.5c3-3 6-3 7.5 0" />
+              <path d="M2 12c4.5-4.5 9.5-4.5 14 0" />
+              <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
+            <span id="wsClients">0</span> ws
+          </div>
+        </div>
+
+        <nav class="nav" id="tabs">
+          <button data-tab="dashboard" class="active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Dashboard
+          </button>
+          <button data-tab="twitch">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
+            </svg>
+            Twitch
+          </button>
+          <button data-tab="schedule">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            Schedule
+          </button>
+          <button data-tab="subathon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            Subathon
+          </button>
+          <button data-tab="events">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            WS Emit
+          </button>
+          <button data-tab="state">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+            </svg>
+            Raw State
+          </button>
+        </nav>
+
+        <div class="rail-footer">
+          <button id="refreshAll" class="btn-rail">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M23 4v6h-6" />
+              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+            </svg>
+            Refresh
+          </button>
+          <button id="resetState" class="btn-rail btn-rail--danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            </svg>
+            Reset
+          </button>
+        </div>
+      </aside>
+
+      <!-- ─── Main ─── -->
+      <main class="content">
+        <!-- ═══ Dashboard ═══ -->
+        <section class="panel active" data-panel="dashboard">
+          <div class="panel-head">
+            <h2>Dashboard</h2>
+            <p>Import live data from the real NeuroInfo API or inspect mock state.</p>
+          </div>
+
+          <div class="token-bar">
+            <label for="niaToken">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              NIA Token
+            </label>
+            <input id="niaToken" type="password" placeholder="Paste your real API token for upstream imports" spellcheck="false" />
+          </div>
+
+          <div class="cols">
+            <div class="col">
+              <div class="section-label">Import from real API</div>
+              <div class="import-grid">
+                <button id="importStream" class="import-btn" data-icon="▶">Stream</button>
+                <button id="importVods" class="import-btn" data-icon="◉">VODs</button>
+                <button id="importScheduleLatest" class="import-btn" data-icon="◫">Latest schedule</button>
+                <button id="importSubathonCurrent" class="import-btn" data-icon="★">Current subathon</button>
+                <button id="importDevstreamTimes" class="import-btn" data-icon="◷">Devstream times</button>
+              </div>
+              <div class="section-label" style="margin-top: 16px">Import specific</div>
+              <div class="inline-import">
+                <input id="importWeekYear" type="number" placeholder="year" class="input-sm" />
+                <input id="importWeekWeek" type="number" min="1" max="53" placeholder="week" class="input-sm" />
+                <button id="importScheduleWeek" class="btn-sm">Import week</button>
+              </div>
+              <div class="inline-import">
+                <input id="importSubathonYear" type="number" placeholder="year" class="input-sm" />
+                <button id="importSubathonYearBtn" class="btn-sm">Import subathon</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="section-label">Server snapshot</div>
+              <pre id="snapshot" class="code-block"></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Twitch ═══ -->
+        <section class="panel" data-panel="twitch">
+          <div class="panel-head">
+            <h2>Twitch</h2>
+            <p>Edit stream and VOD payloads returned by mock REST endpoints.</p>
+          </div>
+          <div class="cols">
+            <div class="col">
+              <div class="editor-head">
+                <span class="section-label">Stream</span>
+                <code class="endpoint">GET /api/v1/twitch/stream</code>
+              </div>
+              <textarea id="streamEditor" class="editor" spellcheck="false"></textarea>
+              <div class="editor-foot">
+                <button id="saveStream" class="btn-action">Save stream</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="editor-head">
+                <span class="section-label">VODs</span>
+                <code class="endpoint">GET /api/v1/twitch/vods</code>
+              </div>
+              <textarea id="vodsEditor" class="editor" spellcheck="false"></textarea>
+              <div class="editor-foot">
+                <button id="saveVods" class="btn-action">Save vods</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Schedule ═══ -->
+        <section class="panel" data-panel="schedule">
+          <div class="panel-head">
+            <h2>Schedule</h2>
+            <p>Upsert weekly schedules, manage the latest pointer, and edit devstream timestamps.</p>
+          </div>
+          <div class="cols">
+            <div class="col">
+              <div class="editor-head">
+                <span class="section-label">Weekly schedule</span>
+                <code class="endpoint">GET /api/v1/schedule</code>
+              </div>
+              <div class="toolbar">
+                <input id="scheduleYear" type="number" placeholder="year" class="input-sm" />
+                <input id="scheduleWeek" type="number" min="1" max="53" placeholder="week" class="input-sm" />
+                <button id="loadWeek" class="btn-sm">Load</button>
+                <div class="toolbar-sep"></div>
+                <label class="toggle-label"><input id="scheduleFinal" type="checkbox" /> isFinal</label>
+                <label class="toggle-label"><input id="scheduleLatest" type="checkbox" checked /> latest</label>
+              </div>
+              <textarea id="scheduleEditor" class="editor" spellcheck="false"></textarea>
+              <div class="editor-foot">
+                <button id="deleteSchedule" class="btn-sm btn-sm--danger">Delete week</button>
+                <button id="saveSchedule" class="btn-action">Save week</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="editor-head">
+                <span class="section-label">Devstream times</span>
+                <code class="endpoint">GET /api/v1/schedule/devstreamtimes</code>
+              </div>
+              <textarea id="devstreamEditor" class="editor" spellcheck="false"></textarea>
+              <div class="editor-foot">
+                <button id="saveDevstream" class="btn-action">Save timestamps</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Subathon ═══ -->
+        <section class="panel" data-panel="subathon">
+          <div class="panel-head">
+            <h2>Subathon</h2>
+            <p>Manage subathon year entries and active state for mock endpoints.</p>
+          </div>
+          <div class="cols">
+            <div class="col">
+              <div class="editor-head">
+                <span class="section-label">Subathon by year</span>
+                <code class="endpoint">GET /api/v1/subathon</code>
+              </div>
+              <div class="toolbar">
+                <input id="subathonYear" type="number" placeholder="year" class="input-sm" />
+                <button id="loadSubathon" class="btn-sm">Load</button>
+              </div>
+              <textarea id="subathonEditor" class="editor" spellcheck="false"></textarea>
+              <div class="editor-foot">
+                <button id="deleteSubathon" class="btn-sm btn-sm--danger">Delete year</button>
+                <button id="saveSubathon" class="btn-action">Save subathon</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="section-label">Active subathons preview</div>
+              <pre id="subathonPreview" class="code-block"></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ WS Emit ═══ -->
+        <section class="panel" data-panel="events">
+          <div class="panel-head">
+            <h2>WebSocket Emit</h2>
+            <p>Broadcast event messages to all subscribed WebSocket clients.</p>
+          </div>
+          <div class="emit-layout">
+            <div class="toolbar">
+              <select id="eventType" class="input-sm"></select>
+              <input id="eventTimestamp" type="number" placeholder="timestamp ms (optional)" class="input-sm" />
+            </div>
+            <textarea id="eventEditor" class="editor" spellcheck="false"></textarea>
+            <div class="editor-foot">
+              <button id="emitEvent" class="btn-action btn-action--emit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M22 2L11 13" />
+                  <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+                Emit event
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Raw State ═══ -->
+        <section class="panel" data-panel="state">
+          <div class="panel-head">
+            <h2>Raw State</h2>
+            <p>Edit the full mock state JSON directly and persist in one step.</p>
+          </div>
+          <textarea id="stateEditor" class="editor editor--full" spellcheck="false"></textarea>
+          <div class="editor-foot">
+            <button id="saveState" class="btn-action">Save full state</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ─── Console drawer ─── -->
+    <div class="console-drawer" id="consoleDrawer">
+      <button class="console-toggle" id="consoleToggle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
+        </svg>
+        Console
+        <span class="console-badge" id="consoleBadge">0</span>
+      </button>
+      <div class="console-body" id="consoleBody">
+        <div class="console-bar">
+          <span>Output</span>
+          <button id="clearLog" class="console-clear">Clear</button>
+        </div>
+        <div id="log" class="log-area"></div>
+      </div>
+    </div>
+
+    <!-- ─── Toast container ─── -->
+    <div id="toasts" class="toast-container"></div>
+
+    <script src="/ui/app.js" type="module"></script>
+  </body>
+</html>

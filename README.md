@@ -1,143 +1,125 @@
-# NIA WS Test Server
+# NIA Mock Test Server
 
-Use this repository to test your app's `NeuroInfoApiWebsocketClient` integration locally, without waiting for real live events.
+Local Bun server for testing code using NeuroInfoAPI against a controllable mock backend.
 
-This server emulates the NIA WebSocket flow and lets you manually broadcast events from a CLI menu.
+This project now covers:
 
-## What this test server provides
+- REST API mock endpoints (`/api/v1/...`)
+- WebSocket endpoint + ticket auth flow (`/api/ws`, `/api/ws/ticket`)
+- Browser UI for editing state and emitting events (`/ui`)
+- JSON persistence (`src/mock-state.json`)
+- Importing real data from upstream NeuroInfo API via `neuroinfoapi-client`
 
-- WebSocket endpoint: `ws://localhost:8787/api/ws`
-- Ticket endpoint: `http://localhost:8787/api/ws/ticket`
-- Health endpoint: `http://localhost:8787/health`
-- Manual event broadcasting from a terminal menu
-- Test mode auth behavior: any token/ticket is accepted
+## Quick Start
 
-Supported event types:
+Requirements:
 
-- `scheduleUpdate`
-- `subathonUpdate`
-- `subathonGoalUpdate`
-- `streamOnline`
-- `streamUpdate`
-- `streamOffline`
-- `secretneuroaccountOnline`
-- `streamRaidIncoming`
-- `streamRaidOutgoing`
+- [Bun](https://bun.sh/)
 
-## 1) Prepare this repository
-
-**Requirements**:
-- [Bun](https://bun.sh/) installed
-
-Clone and enter the repository:
+Install deps:
 
 ```bash
-git clone https://github.com/NeuroInfoAPI/NIA-WS-TestServer
-cd NIA-WS-TestServer
-```
-
-Install dependencies:
-
-```bash
+cd Mock-TestServer
 bun install
 ```
 
-Start the test server:
+> [!NOTE]
+> If some error accours with axios on starting the server please use `npm install` instead of `bun install`.
 
 ```bash
-bun run start
+bun src/index.ts
 ```
 
-By default it runs on port `8787`.
-For testing, keep this default and point your app code to that URL directly.
+Alternative script:
 
-When started, the CLI shows:
-
-- Endpoint URL
-- Ticket API URL
-- A numbered menu to broadcast events
-
-## 2) Refactor your app to support local WS testing
-
-If your app currently hardcodes production URLs, add a small config layer so you can switch between production and local test server.
-
-[Example (`TypeScript`)](./tests/test.ts):
-
-```ts
-import { NeuroInfoApiWebsocketClient } from "neuroinfoapi-client";
-
-function createNiaWsClient() {
-  const token = "local-test"; // You can still use your real token here. 
-
-  // Set local test server URLs directly in code while testing.
-  return new NeuroInfoApiWebsocketClient(token, {
-    baseUrl: "ws://localhost:8787/api/ws",
-    apiBaseUrl: "http://localhost:8787/api",
-    authMethod: "ticket", // works in browser and Node
-  });
-}
-
-export async function startNiaWs() {
-  const wsClient = createNiaWsClient();
-
-  wsClient.on("_connected", (sessionId) => console.log("Connected:", sessionId));
-  wsClient.on("_error", (err) => console.error("WS error:", err));
-
-  await wsClient.connect();
-
-  // Subscribe to any events your app needs
-  wsClient.on("scheduleUpdate", (data) => console.log("schedule week:", data.week));
-  wsClient.on("subathonUpdate", (data) => console.log("subathon:", data.name));
-
-  return wsClient;
-}
-
-void startNiaWs().catch((error) => {
-  console.error("Failed to start NIA WS client:", error);
-});
+```bash
+bun run run
 ```
 
-## 3) Point your app to this local test server in code
+Default URLs:
 
-Like in the example above, set your WebSocket and API base URLs to the local test server:
+- UI: `http://localhost:8787/ui`
+- Health: `http://localhost:8787/health`
+- REST base: `http://localhost:8787/api/v1`
+- WS endpoint: `ws://localhost:8787/api/ws`
+- Ticket endpoint: `http://localhost:8787/api/ws/ticket`
 
-- `baseUrl`: `ws://localhost:8787/api/ws`
-- `apiBaseUrl`: `http://localhost:8787/api`
-- token: any placeholder string such as `local-test` or real token.
+## Auth Behavior in Mock Mode
 
-Start the test server first, then run your app normally.
+- Protected REST endpoints still require `Authorization: Bearer <token>`.
+- Token content is accepted as-is in mock mode (no real token validation).
+- WS allows either:
+  - ticket (`/api/ws?ticket=...`) or
+  - bearer token in `Authorization` header.
+- `/api/ws/ticket` requires an auth header and returns a short-lived one-time ticket.
 
-## 4) Trigger test events
+## What Is Mocked
 
-In the test server terminal, enter the number of an event type in the menu.
+REST routes include (non-exhaustive):
 
-The server will broadcast that event to all clients currently subscribed to that event.
+- Twitch
+  - `GET /api/v1/twitch/stream`
+  - `GET /api/v1/twitch/vods`
+  - `GET /api/v1/twitch/vod?streamId=...`
+- Schedule
+  - `GET /api/v1/schedule`
+  - `GET /api/v1/schedule/latest`
+  - `GET /api/v1/schedule/search`
+  - `GET /api/v1/schedule/devstreamtimes`
+- Subathon
+  - `GET /api/v1/subathon/current`
+  - `GET /api/v1/subathon/years`
+  - `GET /api/v1/subathon?year=...`
 
-Typical test flow:
+## UI Features
 
-1. Start this test server (`bun run start`)
-2. Start your app with local WS URLs set directly in code
-3. Wait for `_connected`
-4. Trigger `streamOnline` and confirm your handler runs
-5. Trigger `streamOffline` and confirm state reset
-6. Trigger `scheduleUpdate` / `subathonUpdate` and validate parsing
+The UI at `/ui` supports:
 
-## 5) Troubleshooting
+- Editing Twitch, Schedule, and Subathon payloads
+- Emitting WS events
+- Resetting or replacing full state
+- Importing selected data from real API into local state
 
-- Connection fails immediately: check your app uses `ws://localhost:8787/api/ws` for WebSocket.
-- Ticket fetch fails: check `apiBaseUrl` in your code is `http://localhost:8787/api` (not `/api/ws`).
-- Connected but no events received: make sure your app has subscribed/listeners for that specific event.
-- Different port required: update the server port in your project and then update `baseUrl` and `apiBaseUrl` in your app code accordingly.
+Changes are persisted to:
 
-## Protocol notes (if you are not using the official client)
+- `src/mock-state.json`
 
-The server accepts JSON messages:
+## Import From Real API
+
+Use test helper endpoint:
+
+- `POST /api/v1/__test/import`
+
+Payload:
+
+```json
+{
+  "target": "vods",
+  "token": "<real token>",
+  "year": 2026,
+  "week": 15
+}
+```
+
+Supported targets:
+
+- `stream`
+- `vods`
+- `scheduleLatest`
+- `scheduleWeek`
+- `subathonCurrent`
+- `subathonYear`
+- `devstreamtimes`
+
+## WS Protocol (for custom clients)
+
+Inbound:
 
 - `{"type":"addEvent","data":{"eventType":"streamOnline"}}`
 - `{"type":"removeEvent","data":{"eventType":"streamOnline"}}`
 - `{"type":"listEvents","data":{}}`
 
-And emits messages like:
+Outbound message types:
 
 - `welcome`
 - `addSuccess`
@@ -146,4 +128,13 @@ And emits messages like:
 - `event`
 - `invalid`
 
-If you are using `NeuroInfoApiWebsocketClient`, these protocol details are handled for you.
+## Internal Test Endpoints
+
+The mock exposes helper endpoints under `/api/v1/__test/*` for UI and automation, including:
+
+- state read/write/reset
+- Twitch/Schedule/Subathon upserts
+- event emission
+- upstream import
+
+These are intended for local development only.

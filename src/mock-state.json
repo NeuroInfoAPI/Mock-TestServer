@@ -1,0 +1,524 @@
+{
+  "version": 1,
+  "updatedAt": 1775918344729,
+  "twitch": {
+    "stream": {
+      "isLive": false
+    },
+    "vods": [
+      {
+        "id": "2743919545",
+        "streamId": "315429502418",
+        "title": "Evil stream? you know it!",
+        "url": "https://www.twitch.tv/videos/2743919545",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m23s",
+        "viewCount": 59472,
+        "createdAt": 1775757608000,
+        "publishedAt": 1775757608000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/4929bc721a3cd85a2091_vedal987_315429502418_1775757602//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2743218288",
+        "streamId": "316438360036",
+        "title": "Evil & Numi, partners in crime",
+        "url": "https://www.twitch.tv/videos/2743218288",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h27m40s",
+        "viewCount": 70935,
+        "createdAt": 1775678410000,
+        "publishedAt": 1775678410000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/182283204a9670f1f49a_vedal987_316438360036_1775678405//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2742327588",
+        "streamId": "316399714274",
+        "title": "its chewsday innit, neuro",
+        "url": "https://www.twitch.tv/videos/2742327588",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 67314,
+        "createdAt": 1775584806000,
+        "publishedAt": 1775584806000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/8bf68c767b7240f134d1_vedal987_316399714274_1775584801//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2739904111",
+        "streamId": "316401906916",
+        "title": "Vedal and Evil buggin out in Hollow Knight",
+        "url": "https://www.twitch.tv/videos/2739904111",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h58m3s",
+        "viewCount": 95918,
+        "createdAt": 1775325611000,
+        "publishedAt": 1775325611000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/988a061b53e3d832b193_vedal987_316401906916_1775325604//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2738173014",
+        "streamId": "315382584017",
+        "title": "what's Evil plotting",
+        "url": "https://www.twitch.tv/videos/2738173014",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 72859,
+        "createdAt": 1775152806000,
+        "publishedAt": 1775152806000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/f6116099f1b863c7ef33_vedal987_315382584017_1775152800//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2737352894",
+        "streamId": "315378782545",
+        "title": "Neuro karaoke time",
+        "url": "https://www.twitch.tv/videos/2737352894",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h4m0s",
+        "viewCount": 72895,
+        "createdAt": 1775066405000,
+        "publishedAt": 1775066405000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/602b76913b826168e17b_vedal987_315378782545_1775066400//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2736536989",
+        "streamId": "315414171347",
+        "title": "Neuro stream? today is a great day",
+        "url": "https://www.twitch.tv/videos/2736536989",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m23s",
+        "viewCount": 63665,
+        "createdAt": 1774980006000,
+        "publishedAt": 1774980006000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/868dd95c17c0982a4231_vedal987_315414171347_1774980001//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2734089387",
+        "streamId": "316339166052",
+        "title": "Evil sabotages Vedal in Hollow Knight",
+        "url": "https://www.twitch.tv/videos/2734089387",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h49m30s",
+        "viewCount": 74728,
+        "createdAt": 1774724410000,
+        "publishedAt": 1774724410000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/d286dec14592b9614013_vedal987_316339166052_1774724403//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2732384312",
+        "streamId": "315357708241",
+        "title": "evil is back",
+        "url": "https://www.twitch.tv/videos/2732384312",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m18s",
+        "viewCount": 76722,
+        "createdAt": 1774551606000,
+        "publishedAt": 1774551606000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/dff127fb2881b240aa73_vedal987_315357708241_1774551600//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2731572472",
+        "streamId": "316283917282",
+        "title": "EVIL'S BIRTHDAY",
+        "url": "https://www.twitch.tv/videos/2731572472",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "4h28m17s",
+        "viewCount": 296274,
+        "createdAt": 1774465207000,
+        "publishedAt": 1774465207000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/42ae20d64c7762956024_vedal987_316283917282_1774465201//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2730753439",
+        "streamId": "315390169171",
+        "title": "slightly experimental neuro stream",
+        "url": "https://www.twitch.tv/videos/2730753439",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 70599,
+        "createdAt": 1774378808000,
+        "publishedAt": 1774378808000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/1d04069129f951b25dc8_vedal987_315390169171_1774378802//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2727363482",
+        "streamId": "316287178979",
+        "title": "Hollow Knight but Vedal and Evil won’t stop buggin",
+        "url": "https://www.twitch.tv/videos/2727363482",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h35m27s",
+        "viewCount": 68191,
+        "createdAt": 1774033207000,
+        "publishedAt": 1774033207000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/6239c208e381ac460c76_vedal987_316287178979_1774033199//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2726511529",
+        "streamId": "316259561444",
+        "title": "Prepare for Evil!!!",
+        "url": "https://www.twitch.tv/videos/2726511529",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 58196,
+        "createdAt": 1773946808000,
+        "publishedAt": 1773946808000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/4954f5612a094ef73128_vedal987_316259561444_1773946801//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2725689552",
+        "streamId": "315369725523",
+        "title": "Evil's singing can make dreams come true",
+        "url": "https://www.twitch.tv/videos/2725689552",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h4m40s",
+        "viewCount": 58269,
+        "createdAt": 1773860407000,
+        "publishedAt": 1773860407000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/ea1d6d4531ba30d35ad7_vedal987_315369725523_1773860401//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2724871337",
+        "streamId": "316262383459",
+        "title": "you wouldn't believe",
+        "url": "https://www.twitch.tv/videos/2724871337",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 59610,
+        "createdAt": 1773774024000,
+        "publishedAt": 1773774024000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/a767a41c34ab75d54eeb_vedal987_316262383459_1773774016//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2722343184",
+        "streamId": "316216770404",
+        "title": "Evil & Vedal bugging out in Hollow Knight",
+        "url": "https://www.twitch.tv/videos/2722343184",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "3h1m21s",
+        "viewCount": 82167,
+        "createdAt": 1773514811000,
+        "publishedAt": 1773514811000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/3e83623d8032ead53542_vedal987_316216770404_1773514803//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2720587979",
+        "streamId": "316169707874",
+        "title": "EVIL STREAM, JUST A WEEK AWAY! OH WOW! I AM SO HAPPY ABOUT THIS INFORMATION",
+        "url": "https://www.twitch.tv/videos/2720587979",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m20s",
+        "viewCount": 60061,
+        "createdAt": 1773342014000,
+        "publishedAt": 1773342014000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/5a8c3626f811ef7b64a3_vedal987_316169707874_1773342006//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2718942562",
+        "streamId": "315323998930",
+        "title": "neuro stream!",
+        "url": "https://www.twitch.tv/videos/2718942562",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h23m0s",
+        "viewCount": 60266,
+        "createdAt": 1773169208000,
+        "publishedAt": 1773169208000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/e41b79e887bfe3c1c782_vedal987_315323998930_1773169203//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2718175504",
+        "streamId": "315320813010",
+        "title": "Neuro and Camila drawing competition",
+        "url": "https://www.twitch.tv/videos/2718175504",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h15m20s",
+        "viewCount": 80085,
+        "createdAt": 1773086407000,
+        "publishedAt": 1773086407000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/77c40705e2e41f22be73_vedal987_315320813010_1773086401//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2716392816",
+        "streamId": "316175299939",
+        "title": "Evil bugs Vedal in Hollow Knight",
+        "url": "https://www.twitch.tv/videos/2716392816",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "4h42m21s",
+        "viewCount": 113336,
+        "createdAt": 1772910011000,
+        "publishedAt": 1772910011000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/9d7e0813e970aea4ab81_vedal987_316175299939_1772910004//thumb/thumb0-%{width}x%{height}.jpg"
+      }
+    ]
+  },
+  "schedule": {
+    "weeks": {
+      "2026-14": {
+        "year": 2026,
+        "week": 14,
+        "isFinal": false,
+        "schedule": [
+          {
+            "day": 2,
+            "time": 1775070000000,
+            "message": "Neuro Karaoke",
+            "type": "normal"
+          },
+          {
+            "day": 4,
+            "time": 1775244600000,
+            "message": "Collab Stream",
+            "type": "TBD"
+          },
+          {
+            "day": 6,
+            "time": 1775412000000,
+            "message": "Offline",
+            "type": "offline"
+          }
+        ]
+      },
+      "2026-15": {
+        "year": 2026,
+        "week": 15,
+        "schedule": [
+          {
+            "day": 2,
+            "time": 1775584800000,
+            "message": "Neuro Stream",
+            "type": "normal"
+          },
+          {
+            "day": 3,
+            "time": 1775678400000,
+            "message": "Evil & Numi Hangout",
+            "type": "normal"
+          },
+          {
+            "day": 4,
+            "time": 1775757600000,
+            "message": "Evil Stream",
+            "type": "normal"
+          },
+          {
+            "day": 5,
+            "time": 1775844000000,
+            "message": "Offline",
+            "type": "offline"
+          },
+          {
+            "day": 6,
+            "time": 1775934000000,
+            "message": "Offline",
+            "type": "offline"
+          },
+          {
+            "day": 0,
+            "time": 1776016800000,
+            "message": "Cyberpunk 2077: Phantom Liberty w/ Neuro & Vedal",
+            "type": "normal"
+          },
+          {
+            "day": 1,
+            "time": 1776106800000,
+            "message": "Offline",
+            "type": "offline"
+          }
+        ],
+        "isFinal": true
+      },
+      "2026-16": {
+        "year": 2026,
+        "week": 16,
+        "isFinal": false,
+        "schedule": [
+          {
+            "day": 2,
+            "time": 1776279600000,
+            "message": "Neuro Karaoke",
+            "type": "normal"
+          },
+          {
+            "day": 4,
+            "time": 1776454200000,
+            "message": "Evil Stream",
+            "type": "normal"
+          },
+          {
+            "day": 6,
+            "time": 1776621600000,
+            "message": "Offline",
+            "type": "offline"
+          }
+        ]
+      }
+    },
+    "latestKey": "2026-15",
+    "devstreamtimes": [
+      1679335200000,
+      1679335200000,
+      1679680800000,
+      1679878800000,
+      1681131600000,
+      1681732800000,
+      1682438400000,
+      1683288000000,
+      1684414800000,
+      1684771200000,
+      1685383200000,
+      1685991600000,
+      1687212000000,
+      1688407200000,
+      1690048800000,
+      1690826400000,
+      1692640800000,
+      1693245600000,
+      1693850400000,
+      1694455200000,
+      1695664800000,
+      1696269600000,
+      1696874400000,
+      1697479200000,
+      1698688800000,
+      1699297200000,
+      1699902000000,
+      1701111600000,
+      1701716400000,
+      1702321200000,
+      1713204000000,
+      1713808800000,
+      1714413600000,
+      1715018400000,
+      1715623200000,
+      1716228000000,
+      1716832800000,
+      1717437600000,
+      1718042400000,
+      1719180000000,
+      1719252000000,
+      1720116000000,
+      1720461600000,
+      1721066400000,
+      1721671200000,
+      1722276000000,
+      1722880800000,
+      1723485600000,
+      1724695200000,
+      1725300000000,
+      1725904800000,
+      1726509600000,
+      1727719200000,
+      1728324000000,
+      1728928800000,
+      1729533600000,
+      1730142000000,
+      1730746800000,
+      1731351600000,
+      1731956400000,
+      1732561200000,
+      1733166000000,
+      1749492000000,
+      1750701600000,
+      1751911200000,
+      1753725600000,
+      1756144800000,
+      1757959200000,
+      1759168800000,
+      1760378400000,
+      1761591600000,
+      1762801200000,
+      1764010800000,
+      1765220400000
+    ]
+  },
+  "subathon": {
+    "byYear": {
+      "2025": {
+        "year": 2025,
+        "name": "Neuro-sama Subathon 3",
+        "subcount": 82400,
+        "goals": {
+          "1000": {
+            "name": "Kickoff",
+            "completed": true,
+            "reached": true
+          },
+          "20000": {
+            "name": "Song Cover",
+            "completed": true,
+            "reached": true
+          },
+          "90000": {
+            "name": "Bonus Goal",
+            "completed": false,
+            "reached": false
+          }
+        },
+        "isActive": false,
+        "startTimestamp": 1763821750345,
+        "endTimestamp": 1764512950345
+      },
+      "2026": {
+        "year": 2026,
+        "name": "Neuro-sama Subathon 4",
+        "subcount": 132450,
+        "goals": {
+          "1000": {
+            "name": "Goal A",
+            "completed": true,
+            "reached": true
+          },
+          "100000": {
+            "name": "Goal B",
+            "completed": false,
+            "reached": true
+          },
+          "150000": {
+            "name": "Goal C",
+            "completed": false,
+            "reached": false
+          }
+        },
+        "isActive": true,
+        "startTimestamp": 1775485750345
+      }
+    }
+  }
+}
