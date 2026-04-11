@@ -8,7 +8,7 @@ This project now covers:
 - WebSocket endpoint + ticket auth flow (`/api/ws`, `/api/ws/ticket`)
 - Browser UI for editing state and emitting events (`/ui`)
 - JSON persistence (`src/mock-state.json`)
-- Importing real data from upstream NeuroInfo API via `neuroinfoapi-client`
+- Importing real data from upstream NeuroInfoApi via `neuroinfoapi-client`
 
 ## Quick Start
 

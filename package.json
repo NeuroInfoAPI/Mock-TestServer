@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "author": "Appstun",
   "license": "MIT",
-  "description": "Bun-based local NeuroInfo API mock server (REST + WebSocket) with persistent state and upstream import support",
+  "description": "Bun-based local NeuroInfoApi mock server (REST + WebSocket) with persistent state and upstream import support",
   "scripts": {
     "run": "bun run src/index.ts"
   },
