@@ -143,12 +143,20 @@ export class StateStore {
   private async saveNow(): Promise<void> {
     const targetDir = dirname(this.filePath);
     const tempPath = this.filePath + ".tmp";
-    await mkdir(targetDir, { recursive: true });
+    try {
+      await mkdir(targetDir, { recursive: true });
+    } catch (error: unknown) {
+      if (!hasErrorCode(error, "EEXIST")) throw error;
+    }
 
     const serialized = JSON.stringify(this.state, null, 2);
     await Bun.write(tempPath, serialized);
     await rename(tempPath, this.filePath);
   }
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === code;
 }
 
 function sanitizeState(state: MockState): MockState {
