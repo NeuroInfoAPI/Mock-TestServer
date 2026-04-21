@@ -1,11 +1,109 @@
 {
   "version": 1,
-  "updatedAt": 1775918344729,
+  "updatedAt": 1776796994168,
   "twitch": {
     "stream": {
-      "isLive": false
+      "isLive": true,
+      "id": "315493103955",
+      "title": "this isn't your average neuro tuesday... or is it? find out",
+      "game": {
+        "id": "509658",
+        "name": "Just Chatting"
+      },
+      "language": "en",
+      "tags": [
+        "English"
+      ],
+      "isMature": false,
+      "viewerCount": 6221,
+      "startedAt": 1776794401000,
+      "thumbnailUrl": "https://static-cdn.jtvnw.net/previews-ttv/live_user_vedal987-{width}x{height}.jpg"
     },
     "vods": [
+      {
+        "id": "2753675215",
+        "streamId": "315493103955",
+        "title": "this isn't your average neuro tuesday... or is it? find out",
+        "url": "https://www.twitch.tv/videos/2753675215",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "14m10s",
+        "viewCount": 4,
+        "createdAt": 1776794407000,
+        "publishedAt": 1776794407000,
+        "thumbnailUrl": "https://vod-secure.twitch.tv/_404/404_processing_%{width}x%{height}.png"
+      },
+      {
+        "id": "2752887161",
+        "streamId": "315448038993",
+        "title": "VEDAL AND EVIL VRCHAT (for real this time)",
+        "url": "https://www.twitch.tv/videos/2752887161",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h35m3s",
+        "viewCount": 94185,
+        "createdAt": 1776707993000,
+        "publishedAt": 1776707993000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/d3a0f1b85346bb9afbd3_vedal987_315448038993_1776707988//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2749603556",
+        "streamId": "315433204177",
+        "title": "you will NOT believe evil's yap sesh today",
+        "url": "https://www.twitch.tv/videos/2749603556",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h15m50s",
+        "viewCount": 64135,
+        "createdAt": 1776362737000,
+        "publishedAt": 1776362737000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/12478b4cf40ff6d56d1f_vedal987_315433204177_1776362732//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2748814798",
+        "streamId": "315469431635",
+        "title": "Evil's singing is here to take over the world",
+        "url": "https://www.twitch.tv/videos/2748814798",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h13m30s",
+        "viewCount": 59762,
+        "createdAt": 1776276006000,
+        "publishedAt": 1776276006000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/f8b5efd480340bb98845_vedal987_315469431635_1776276000//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2748027356",
+        "streamId": "316507636963",
+        "title": "a neuro a day keeps the tutel away",
+        "url": "https://www.twitch.tv/videos/2748027356",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "2h21m15s",
+        "viewCount": 56334,
+        "createdAt": 1776189607000,
+        "publishedAt": 1776189607000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/ca71a3290e8b558cc71e_vedal987_316507636963_1776189600//thumb/thumb0-%{width}x%{height}.jpg"
+      },
+      {
+        "id": "2746469748",
+        "streamId": "316445055586",
+        "title": "finally playing the cyberpunk dlc with neuro",
+        "url": "https://www.twitch.tv/videos/2746469748",
+        "viewable": "public",
+        "type": "archive",
+        "language": "en",
+        "duration": "3h29m37s",
+        "viewCount": 87894,
+        "createdAt": 1776016811000,
+        "publishedAt": 1776016811000,
+        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/eac6cd995100490dcc6d_vedal987_316445055586_1776016804//thumb/thumb0-%{width}x%{height}.jpg"
+      },
       {
         "id": "2743919545",
         "streamId": "315429502418",
@@ -15,7 +113,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m23s",
-        "viewCount": 59472,
+        "viewCount": 65850,
         "createdAt": 1775757608000,
         "publishedAt": 1775757608000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/4929bc721a3cd85a2091_vedal987_315429502418_1775757602//thumb/thumb0-%{width}x%{height}.jpg"
@@ -29,7 +127,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h27m40s",
-        "viewCount": 70935,
+        "viewCount": 72610,
         "createdAt": 1775678410000,
         "publishedAt": 1775678410000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/182283204a9670f1f49a_vedal987_316438360036_1775678405//thumb/thumb0-%{width}x%{height}.jpg"
@@ -43,7 +141,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m20s",
-        "viewCount": 67314,
+        "viewCount": 67759,
         "createdAt": 1775584806000,
         "publishedAt": 1775584806000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/8bf68c767b7240f134d1_vedal987_316399714274_1775584801//thumb/thumb0-%{width}x%{height}.jpg"
@@ -57,7 +155,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h58m3s",
-        "viewCount": 95918,
+        "viewCount": 96466,
         "createdAt": 1775325611000,
         "publishedAt": 1775325611000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/988a061b53e3d832b193_vedal987_316401906916_1775325604//thumb/thumb0-%{width}x%{height}.jpg"
@@ -71,7 +169,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m20s",
-        "viewCount": 72859,
+        "viewCount": 73063,
         "createdAt": 1775152806000,
         "publishedAt": 1775152806000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/f6116099f1b863c7ef33_vedal987_315382584017_1775152800//thumb/thumb0-%{width}x%{height}.jpg"
@@ -85,7 +183,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h4m0s",
-        "viewCount": 72895,
+        "viewCount": 73258,
         "createdAt": 1775066405000,
         "publishedAt": 1775066405000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/602b76913b826168e17b_vedal987_315378782545_1775066400//thumb/thumb0-%{width}x%{height}.jpg"
@@ -99,7 +197,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m23s",
-        "viewCount": 63665,
+        "viewCount": 63806,
         "createdAt": 1774980006000,
         "publishedAt": 1774980006000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/868dd95c17c0982a4231_vedal987_315414171347_1774980001//thumb/thumb0-%{width}x%{height}.jpg"
@@ -113,7 +211,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h49m30s",
-        "viewCount": 74728,
+        "viewCount": 74901,
         "createdAt": 1774724410000,
         "publishedAt": 1774724410000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/d286dec14592b9614013_vedal987_316339166052_1774724403//thumb/thumb0-%{width}x%{height}.jpg"
@@ -127,7 +225,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m18s",
-        "viewCount": 76722,
+        "viewCount": 76843,
         "createdAt": 1774551606000,
         "publishedAt": 1774551606000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/dff127fb2881b240aa73_vedal987_315357708241_1774551600//thumb/thumb0-%{width}x%{height}.jpg"
@@ -141,7 +239,7 @@
         "type": "archive",
         "language": "en",
         "duration": "4h28m17s",
-        "viewCount": 296274,
+        "viewCount": 297122,
         "createdAt": 1774465207000,
         "publishedAt": 1774465207000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/42ae20d64c7762956024_vedal987_316283917282_1774465201//thumb/thumb0-%{width}x%{height}.jpg"
@@ -155,7 +253,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m20s",
-        "viewCount": 70599,
+        "viewCount": 70687,
         "createdAt": 1774378808000,
         "publishedAt": 1774378808000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/1d04069129f951b25dc8_vedal987_315390169171_1774378802//thumb/thumb0-%{width}x%{height}.jpg"
@@ -169,7 +267,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h35m27s",
-        "viewCount": 68191,
+        "viewCount": 68282,
         "createdAt": 1774033207000,
         "publishedAt": 1774033207000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/6239c208e381ac460c76_vedal987_316287178979_1774033199//thumb/thumb0-%{width}x%{height}.jpg"
@@ -183,7 +281,7 @@
         "type": "archive",
         "language": "en",
         "duration": "2h21m20s",
-        "viewCount": 58196,
+        "viewCount": 58270,
         "createdAt": 1773946808000,
         "publishedAt": 1773946808000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/4954f5612a094ef73128_vedal987_316259561444_1773946801//thumb/thumb0-%{width}x%{height}.jpg"
@@ -197,94 +295,10 @@
         "type": "archive",
         "language": "en",
         "duration": "2h4m40s",
-        "viewCount": 58269,
+        "viewCount": 58337,
         "createdAt": 1773860407000,
         "publishedAt": 1773860407000,
         "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/ea1d6d4531ba30d35ad7_vedal987_315369725523_1773860401//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2724871337",
-        "streamId": "316262383459",
-        "title": "you wouldn't believe",
-        "url": "https://www.twitch.tv/videos/2724871337",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "2h21m20s",
-        "viewCount": 59610,
-        "createdAt": 1773774024000,
-        "publishedAt": 1773774024000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/a767a41c34ab75d54eeb_vedal987_316262383459_1773774016//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2722343184",
-        "streamId": "316216770404",
-        "title": "Evil & Vedal bugging out in Hollow Knight",
-        "url": "https://www.twitch.tv/videos/2722343184",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "3h1m21s",
-        "viewCount": 82167,
-        "createdAt": 1773514811000,
-        "publishedAt": 1773514811000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/3e83623d8032ead53542_vedal987_316216770404_1773514803//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2720587979",
-        "streamId": "316169707874",
-        "title": "EVIL STREAM, JUST A WEEK AWAY! OH WOW! I AM SO HAPPY ABOUT THIS INFORMATION",
-        "url": "https://www.twitch.tv/videos/2720587979",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "2h21m20s",
-        "viewCount": 60061,
-        "createdAt": 1773342014000,
-        "publishedAt": 1773342014000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/5a8c3626f811ef7b64a3_vedal987_316169707874_1773342006//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2718942562",
-        "streamId": "315323998930",
-        "title": "neuro stream!",
-        "url": "https://www.twitch.tv/videos/2718942562",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "2h23m0s",
-        "viewCount": 60266,
-        "createdAt": 1773169208000,
-        "publishedAt": 1773169208000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/e41b79e887bfe3c1c782_vedal987_315323998930_1773169203//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2718175504",
-        "streamId": "315320813010",
-        "title": "Neuro and Camila drawing competition",
-        "url": "https://www.twitch.tv/videos/2718175504",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "2h15m20s",
-        "viewCount": 80085,
-        "createdAt": 1773086407000,
-        "publishedAt": 1773086407000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/77c40705e2e41f22be73_vedal987_315320813010_1773086401//thumb/thumb0-%{width}x%{height}.jpg"
-      },
-      {
-        "id": "2716392816",
-        "streamId": "316175299939",
-        "title": "Evil bugs Vedal in Hollow Knight",
-        "url": "https://www.twitch.tv/videos/2716392816",
-        "viewable": "public",
-        "type": "archive",
-        "language": "en",
-        "duration": "4h42m21s",
-        "viewCount": 113336,
-        "createdAt": 1772910011000,
-        "publishedAt": 1772910011000,
-        "thumbnailUrl": "https://static-cdn.jtvnw.net/cf_vods/d3stzm2eumvgb4/9d7e0813e970aea4ab81_vedal987_316175299939_1772910004//thumb/thumb0-%{width}x%{height}.jpg"
       }
     ]
   },
@@ -362,7 +376,8 @@
             "type": "offline"
           }
         ],
-        "isFinal": true
+        "isFinal": true,
+        "hasActiveSubathon": false
       },
       "2026-16": {
         "year": 2026,
@@ -388,9 +403,59 @@
             "type": "offline"
           }
         ]
+      },
+      "2026-17": {
+        "year": 2026,
+        "week": 17,
+        "schedule": [
+          {
+            "day": 2,
+            "time": 1776794400000,
+            "message": "Neuro Stream",
+            "type": "normal"
+          },
+          {
+            "day": 3,
+            "time": 1776880800000,
+            "message": "Offline",
+            "type": "offline"
+          },
+          {
+            "day": 4,
+            "time": 1776967200000,
+            "message": "Evil Stream",
+            "type": "normal"
+          },
+          {
+            "day": 5,
+            "time": 1777057200000,
+            "message": "Easy Bake Cooking w/ Numi & Evil",
+            "type": "normal"
+          },
+          {
+            "day": 6,
+            "time": 1777140000000,
+            "message": "Offline",
+            "type": "offline"
+          },
+          {
+            "day": 0,
+            "time": 1777226400000,
+            "message": "Offline",
+            "type": "offline"
+          },
+          {
+            "day": 1,
+            "time": 1777312800000,
+            "message": "Dev Stream",
+            "type": "normal"
+          }
+        ],
+        "isFinal": true,
+        "hasActiveSubathon": false
       }
     },
-    "latestKey": "2026-15",
+    "latestKey": "2026-17",
     "devstreamtimes": [
       1679335200000,
       1679335200000,
@@ -465,7 +530,8 @@
       1761591600000,
       1762801200000,
       1764010800000,
-      1765220400000
+      1765220400000,
+      1777312800000
     ]
   },
   "subathon": {
@@ -516,7 +582,7 @@
             "reached": false
           }
         },
-        "isActive": true,
+        "isActive": false,
         "startTimestamp": 1775485750345
       }
     }

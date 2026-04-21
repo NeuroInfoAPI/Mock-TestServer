@@ -14,7 +14,19 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   SB3: "Invalid year parameter or year cannot be in the future",
   SB4: "No subathon found for the specified year",
   AU1: "Missing or invalid authorization header",
+  AU2: "Invalid or expired API token",
+  RL2: "Too many requests from this API token",
+  RL3: "Rate limit exceeded: Maximum 30 requests per minute",
+  RL4: "Rate limit exceeded: Maximum 100 requests per minute",
+  RL5: "Rate limit exceeded: Maximum 300 requests per minute",
+  RL6: "Rate limit exceeded: Maximum 10 requests per 10 seconds",
+  RL7: "Rate limit exceeded: Maximum 2 requests per 10 seconds",
+  RL8: "Rate limit exceeded: Maximum 6 requests per minute",
 };
+
+export function isApiErrorCode(value: unknown): value is ApiErrorCode {
+  return typeof value === "string" && value in MESSAGES;
+}
 
 export function errorPayload(code: ApiErrorCode): ApiErrorPayload {
   return {

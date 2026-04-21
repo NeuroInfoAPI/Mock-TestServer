@@ -15,7 +15,7 @@ import {
   WsEventType,
 } from "./contracts";
 import { compareYearWeek, getIsoWeekAndYear, getScheduleKey } from "./defaults";
-import { errorPayload } from "./errors";
+import { errorPayload, isApiErrorCode } from "./errors";
 import { StateStore } from "./stateStore";
 import { TicketStore } from "./tickets";
 import {
@@ -107,6 +107,23 @@ function makeSubathonYears(state: MockState): number[] {
     .map((value) => Number(value))
     .filter((value) => Number.isInteger(value))
     .sort((a, b) => a - b);
+}
+
+function makeScheduleWeeksIndex(state: MockState): Record<number, number[]> {
+  const grouped = new Map<number, Set<number>>();
+
+  for (const schedule of Object.values(state.schedule.weeks)) {
+    if (!grouped.has(schedule.year)) grouped.set(schedule.year, new Set<number>());
+    grouped.get(schedule.year)!.add(schedule.week);
+  }
+
+  const result: Record<number, number[]> = {};
+  const years = [...grouped.keys()].sort((a, b) => a - b);
+  for (const year of years) {
+    result[year] = [...grouped.get(year)!].sort((a, b) => a - b);
+  }
+
+  return result;
 }
 
 async function serveUiAsset(pathname: string): Promise<Response> {
@@ -219,6 +236,12 @@ async function startServer() {
         );
       }
 
+      if (url.pathname === "/api/test/geterror" && request.method === "GET") {
+        const code = url.searchParams.get("code");
+        if (!isApiErrorCode(code)) return jsonResponse({ error: "Not Found" }, 404);
+        return jsonResponse(errorPayload(code), 418);
+      }
+
       if (!url.pathname.startsWith("/api/v1/")) {
         return textResponse("Not Found", 404);
       }
@@ -228,7 +251,7 @@ async function startServer() {
 
       if (path === "/api/v1/twitch/stream" && method === "GET") {
         const state = stateStore.getSnapshot();
-        return jsonResponse(state.twitch.stream, 200, { "Cache-Control": "public, max-age=10" });
+        return jsonResponse(state.twitch.stream, 200, { "Cache-Control": "public, max-age=30" });
       }
 
       if (path === "/api/v1/twitch/vods" && method === "GET") {
@@ -264,7 +287,7 @@ async function startServer() {
         const week = Number.parseInt(String(weekRaw || ""), 10);
         const year = Number.parseInt(String(yearRaw || currentYear), 10);
 
-        if (!Number.isInteger(week) || !Number.isInteger(year) || week < 1 || week > 53 || year < 2023 || year > currentYear + 1) {
+        if (!Number.isInteger(week) || !Number.isInteger(year) || week < 1 || week > 53 || year < 2023 || year > currentYear) {
           return jsonResponse(errorPayload("SC2"), 400);
         }
 
@@ -287,8 +310,13 @@ async function startServer() {
             hasActiveSubathon,
           },
           200,
-          { "Cache-Control": "public, max-age=300" },
+          { "Cache-Control": "public, max-age=60" },
         );
+      }
+
+      if (path === "/api/v1/schedule/weeks" && method === "GET") {
+        const state = stateStore.getSnapshot();
+        return jsonResponse(makeScheduleWeeksIndex(state), 200, { "Cache-Control": "public, max-age=300" });
       }
 
       if (path === "/api/v1/schedule/search" && method === "GET") {
@@ -408,6 +436,15 @@ async function startServer() {
 
       if (path === "/api/v1/subathon/years" && method === "GET") {
         const state = stateStore.getSnapshot();
+        if (url.searchParams.has("detailed")) {
+          const detailedYears: Record<number, string> = {};
+          for (const year of makeSubathonYears(state)) {
+            const entry = state.subathon.byYear[String(year)];
+            if (entry) detailedYears[year] = entry.name;
+          }
+          return jsonResponse(detailedYears, 200, { "Cache-Control": "public, max-age=300" });
+        }
+
         return jsonResponse(makeSubathonYears(state), 200, { "Cache-Control": "public, max-age=300" });
       }
 

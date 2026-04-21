@@ -66,10 +66,15 @@ REST routes include (non-exhaustive):
   - `GET /api/v1/schedule/latest`
   - `GET /api/v1/schedule/search`
   - `GET /api/v1/schedule/devstreamtimes`
+  - `GET /api/v1/schedule/weeks`
 - Subathon
   - `GET /api/v1/subathon/current`
-  - `GET /api/v1/subathon/years`
+  - `GET /api/v1/subathon/years` (supports `?detailed`)
   - `GET /api/v1/subathon?year=...`
+
+Additional docs/testing parity endpoint:
+
+- `GET /api/test/geterror?code=AP1` (returns documented error payloads)
 
 ## UI Features
 

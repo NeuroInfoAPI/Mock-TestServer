@@ -102,6 +102,15 @@ export class WsHub {
       return;
     }
 
+    if (parsed.type === "ping") {
+      ws.send(
+        encodeMessage("pong", {
+          // Keep payload shape aligned with API docs: { type: "pong", data: {} }
+        }),
+      );
+      return;
+    }
+
     this.sendInvalid(ws, "malformed", `Unknown message type: ${parsed.type}`);
   }
 

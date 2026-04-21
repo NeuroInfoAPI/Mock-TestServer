@@ -18,6 +18,8 @@ export interface ScheduleLatestResponse extends ScheduleResponse {
   hasActiveSubathon: boolean;
 }
 
+export type ScheduleWeeksResponse = Record<number, number[]>;
+
 export interface ScheduleSearchCursor {
   year: number;
   week: number;
@@ -196,7 +198,28 @@ export const ALL_EVENT_TYPES: readonly WsEventType[] = [
 
 export const ALL_SCHEDULE_DAY_TYPES: readonly ScheduleDayType[] = ["normal", "offline", "canceled", "TBD", "unknown"] as const;
 
-export type ApiErrorCode = "AP1" | "AP3" | "SC1" | "SC2" | "SC3" | "SC4" | "VD1" | "VD2" | "SB1" | "SB2" | "SB3" | "SB4" | "AU1";
+export type ApiErrorCode =
+  | "AP1"
+  | "AP3"
+  | "SC1"
+  | "SC2"
+  | "SC3"
+  | "SC4"
+  | "VD1"
+  | "VD2"
+  | "SB1"
+  | "SB2"
+  | "SB3"
+  | "SB4"
+  | "AU1"
+  | "AU2"
+  | "RL2"
+  | "RL3"
+  | "RL4"
+  | "RL5"
+  | "RL6"
+  | "RL7"
+  | "RL8";
 
 export interface ApiErrorPayload {
   error: {
