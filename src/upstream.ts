@@ -1,5 +1,5 @@
 import { NeuroInfoApiClient } from "neuroinfoapi-client";
-import { ImportTarget, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedResponse, ImportTarget, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 
 const API_BASE_URL = "https://neuro.appstun.net/api/v1";
 
@@ -8,6 +8,7 @@ export type ImportRequest = {
   token: string;
   year?: number;
   week?: number;
+  raw?: boolean;
 };
 
 export type ImportResult =
@@ -22,10 +23,8 @@ export type ImportResult =
 type ClientCallResult<T> = { data: T | null; error: unknown | null };
 
 function createClient(token: string | null): NeuroInfoApiClient {
-  const client = new NeuroInfoApiClient();
-  if (token?.trim()) client.setApiToken(token.trim());
-  if (API_BASE_URL) client.apiInstance.defaults.baseURL = API_BASE_URL;
-  return client;
+  const trimmedToken = token?.trim() || undefined;
+  return new NeuroInfoApiClient(trimmedToken, { baseUrl: API_BASE_URL });
 }
 
 function toImportError(error: unknown): Exclude<ImportResult, { ok: true }> {
@@ -71,8 +70,8 @@ async function callWithClient<T>(
 async function callApiInstance(token: string | null, path: string): Promise<ImportResult> {
   try {
     const client = createClient(token);
-    const response = await client.apiInstance.get(path);
-    return { ok: true, data: response.data };
+    const data = await client.apiInstance(path);
+    return { ok: true, data };
   } catch (error) {
     return toImportError(error);
   }
@@ -119,6 +118,9 @@ export async function importFromUpstream(input: ImportRequest): Promise<ImportRe
     case "devstreamtimes":
       return callApiInstance(null, "/schedule/devstreamtimes");
 
+    case "blogFeed":
+      return callWithClient(input.token, (client) => client.getBlogFeed(!!input.raw));
+
     default:
       return {
         ok: false,
@@ -158,4 +160,12 @@ export function asNumberArray(value: unknown): number[] | null {
   if (!Array.isArray(value)) return null;
   if (!value.every((entry) => typeof entry === "number")) return null;
   return value as number[];
+}
+
+export function asBlogFeedResponse(value: unknown): BlogFeedResponse | null {
+  if (!value || typeof value !== "object") return null;
+  const data = (value as { data?: unknown }).data;
+  if (!data || typeof data !== "object") return null;
+  if (!Array.isArray((data as { entries?: unknown }).entries)) return null;
+  return value as BlogFeedResponse;
 }

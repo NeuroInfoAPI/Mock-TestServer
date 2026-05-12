@@ -4,6 +4,7 @@ import { extractBearerToken, isUnlimitedToken, requireAuthHeader } from "./auth"
 import {
   ALL_EVENT_TYPES,
   ALL_SCHEDULE_DAY_TYPES,
+  BlogFeedResponse,
   ConnectionData,
   ImportTarget,
   MockState,
@@ -20,6 +21,7 @@ import { StateStore } from "./stateStore";
 import { TicketStore } from "./tickets";
 import {
   asNumberArray,
+  asBlogFeedResponse,
   asScheduleResponse,
   asSubathonArray,
   asSubathonData,
@@ -50,6 +52,7 @@ const IMPORT_TARGETS: ImportTarget[] = [
   "subathonCurrent",
   "subathonYear",
   "devstreamtimes",
+  "blogFeed",
 ];
 
 function jsonResponse(payload: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
@@ -124,6 +127,17 @@ function makeScheduleWeeksIndex(state: MockState): Record<number, number[]> {
   }
 
   return result;
+}
+
+function makeBlogFeedResponse(feed: BlogFeedResponse, includeRaw: boolean): BlogFeedResponse {
+  if (includeRaw) return feed;
+
+  return {
+    data: {
+      ...feed.data,
+      entries: feed.data.entries.map(({ rawContent, ...entry }) => entry),
+    },
+  };
 }
 
 async function serveUiAsset(pathname: string): Promise<Response> {
@@ -465,6 +479,15 @@ async function startServer() {
         return jsonResponse(subathon, 200, { "Cache-Control": "private, max-age=300" });
       }
 
+      if (path === "/api/v1/blog/feed" && method === "GET") {
+        const auth = requireAuthHeader(request);
+        if (!auth.ok) return auth.response!;
+
+        const state = stateStore.getSnapshot();
+        const includeRaw = url.searchParams.get("raw") === "true";
+        return jsonResponse(makeBlogFeedResponse(state.blog.feed, includeRaw), 200, { "Cache-Control": "private, max-age=300" });
+      }
+
       if (path === "/api/v1/__test/state" && method === "GET") {
         return jsonResponse({
           state: stateStore.getSnapshot(),
@@ -578,6 +601,16 @@ async function startServer() {
         return jsonResponse({ ok: deleted });
       }
 
+      if (path === "/api/v1/__test/blog/feed" && method === "PUT") {
+        const body = await parseJsonBody<BlogFeedResponse>(request);
+        const feed = asBlogFeedResponse(body);
+        if (!feed) return jsonResponse({ error: "Invalid payload" }, 400);
+
+        stateStore.setBlogFeed(feed);
+        wsHub.broadcast("blogFeedUpdate", feed.data);
+        return jsonResponse({ ok: true });
+      }
+
       if (path === "/api/v1/__test/emit" && method === "POST") {
         const body = await parseJsonBody<{ eventType: WsEventType; eventData: unknown; timestamp?: number }>(request);
         if (!body || !isWsEventType(body.eventType)) return jsonResponse({ error: "Invalid eventType" }, 400);
@@ -588,7 +621,7 @@ async function startServer() {
       }
 
       if (path === "/api/v1/__test/import" && method === "POST") {
-        const body = await parseJsonBody<{ target: ImportTarget; token: string; year?: number; week?: number }>(request);
+        const body = await parseJsonBody<{ target: ImportTarget; token: string; year?: number; week?: number; raw?: boolean }>(request);
         if (!body || !isImportTarget(body.target) || typeof body.token !== "string") {
           return jsonResponse({ error: "Invalid payload" }, 400);
         }
@@ -598,6 +631,7 @@ async function startServer() {
           token: body.token,
           year: body.year,
           week: body.week,
+          raw: body.raw,
         });
 
         if (!result.ok) {
@@ -653,6 +687,13 @@ async function startServer() {
             const times = asNumberArray(result.data);
             if (!times) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
             stateStore.setDevstreamTimes(times);
+            break;
+          }
+          case "blogFeed": {
+            const feed = asBlogFeedResponse(result.data);
+            if (!feed) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
+            stateStore.setBlogFeed(feed);
+            wsHub.broadcast("blogFeedUpdate", feed.data);
             break;
           }
         }

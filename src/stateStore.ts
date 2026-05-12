@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { mkdir, rename } from "node:fs/promises";
-import { MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedResponse, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 import { compareYearWeek, createDefaultMockState, deepClone, getScheduleKey, splitScheduleKey } from "./defaults";
 
 export class StateStore {
@@ -110,6 +110,11 @@ export class StateStore {
     return true;
   }
 
+  setBlogFeed(feed: BlogFeedResponse): void {
+    this.state.blog.feed = deepClone(feed);
+    this.bumpAndSave();
+  }
+
   async flush(): Promise<void> {
     await this.writeQueue;
   }
@@ -173,6 +178,9 @@ function sanitizeState(state: MockState): MockState {
   if (!next.subathon) {
     next.subathon = createDefaultMockState().subathon;
   }
+  if (!next.blog) {
+    next.blog = createDefaultMockState().blog;
+  }
 
   next.twitch.stream = next.twitch.stream ?? { isLive: false };
   next.twitch.vods = Array.isArray(next.twitch.vods) ? next.twitch.vods : [];
@@ -182,6 +190,7 @@ function sanitizeState(state: MockState): MockState {
   next.schedule.devstreamtimes = Array.isArray(next.schedule.devstreamtimes) ? next.schedule.devstreamtimes : [];
 
   next.subathon.byYear = next.subathon.byYear ?? {};
+  next.blog.feed = next.blog.feed ?? createDefaultMockState().blog.feed;
 
   return next;
 }

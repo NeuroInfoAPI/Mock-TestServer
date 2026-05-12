@@ -82,6 +82,34 @@ export interface SubathonData {
   endTimestamp?: number;
 }
 
+export interface BlogEntryBodySection {
+  header: string;
+  body: string;
+}
+
+export interface BlogFeedEntry {
+  title: string;
+  author: string;
+  url: string;
+  published: number;
+  updated: number;
+  content?: BlogEntryBodySection[];
+  rawContent?: string;
+  summary: string;
+}
+
+export interface BlogFeedData {
+  url: string;
+  lastUpdated: number;
+  title: string;
+  subtitle: string;
+  entries: BlogFeedEntry[];
+}
+
+export interface BlogFeedResponse {
+  data: BlogFeedData;
+}
+
 export interface MockState {
   version: 1;
   updatedAt: number;
@@ -97,9 +125,13 @@ export interface MockState {
   subathon: {
     byYear: Record<string, SubathonData>;
   };
+  blog: {
+    feed: BlogFeedResponse;
+  };
 }
 
 export type WsEventType =
+  | "blogFeedUpdate"
   | "scheduleUpdate"
   | "subathonUpdate"
   | "subathonGoalUpdate"
@@ -120,6 +152,7 @@ export type WsInvalidReason =
   | "authError";
 
 export interface WsEventDataMap {
+  blogFeedUpdate: BlogFeedData;
   streamOnline: {
     isLive: true;
     id: string;
@@ -185,6 +218,7 @@ export interface WsEventDataMap {
 }
 
 export const ALL_EVENT_TYPES: readonly WsEventType[] = [
+  "blogFeedUpdate",
   "scheduleUpdate",
   "subathonUpdate",
   "subathonGoalUpdate",
@@ -235,4 +269,12 @@ export interface ConnectionData {
   subscriptions: Set<WsEventType>;
 }
 
-export type ImportTarget = "stream" | "vods" | "scheduleLatest" | "scheduleWeek" | "subathonCurrent" | "subathonYear" | "devstreamtimes";
+export type ImportTarget =
+  | "stream"
+  | "vods"
+  | "scheduleLatest"
+  | "scheduleWeek"
+  | "subathonCurrent"
+  | "subathonYear"
+  | "devstreamtimes"
+  | "blogFeed";

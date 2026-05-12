@@ -1,4 +1,4 @@
-import { MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedResponse, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -165,6 +165,33 @@ function createDefaultSubathons(now: number, year: number): Record<string, Subat
   };
 }
 
+function createDefaultBlogFeed(now: number): BlogFeedResponse {
+  return {
+    data: {
+      url: "https://neurosama.com/blog/feed",
+      lastUpdated: now,
+      title: "Neuro-sama Blog",
+      subtitle: "Local mock blog feed",
+      entries: [
+        {
+          title: "Mock blog entry",
+          author: "NIA Mock",
+          url: "https://neuro.appstun.net/blog/mock-entry",
+          published: now - DAY_MS,
+          updated: now - DAY_MS,
+          summary: "Example blog entry returned by the local mock server.",
+          content: [
+            {
+              header: "Overview",
+              body: "This placeholder keeps the mock shape aligned with neuroinfoapi-client.",
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 export function createDefaultMockState(): MockState {
   const now = Date.now();
   const today = new Date(now);
@@ -207,6 +234,9 @@ export function createDefaultMockState(): MockState {
     },
     subathon: {
       byYear: createDefaultSubathons(now, currentIso.year),
+    },
+    blog: {
+      feed: createDefaultBlogFeed(now),
     },
   };
 }

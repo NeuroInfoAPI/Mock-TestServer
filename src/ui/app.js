@@ -154,6 +154,8 @@ function fillFromSnapshot() {
       latestScheduleKey: snap.schedule.latestKey,
       scheduleKeys: Object.keys(snap.schedule.weeks),
       subathonYears: Object.keys(snap.subathon.byYear),
+      blogEntries: snap.blog?.feed?.data?.entries?.length ?? 0,
+      blogLastUpdated: snap.blog?.feed?.data?.lastUpdated ?? null,
     },
     null,
     2,
@@ -283,6 +285,22 @@ function getDefaultEventPayload(eventType) {
       channel: { displayName: "Outgoing", name: "outgoing", id: "456" },
       viewerCount: 310,
     },
+    blogFeedUpdate: {
+      url: "https://neurosama.com/blog/feed",
+      lastUpdated: now,
+      title: "Neuro-sama Blog",
+      subtitle: "Local mock blog feed",
+      entries: [
+        {
+          title: "Mock blog entry",
+          author: "NIA Mock",
+          url: "https://neuro.appstun.net/blog/mock-entry",
+          published: now - 86400000,
+          updated: now - 86400000,
+          summary: "Example blog entry returned by the local mock server.",
+        },
+      ],
+    },
   };
   return defaults[eventType] || {};
 }
@@ -369,6 +387,7 @@ function bindEvents() {
   importHandler("importScheduleLatest", "scheduleLatest");
   importHandler("importSubathonCurrent", "subathonCurrent");
   importHandler("importDevstreamTimes", "devstreamtimes");
+  importHandler("importBlogFeed", "blogFeed");
   importHandler("importScheduleWeek", "scheduleWeek", () => ({
     year: Number(els.importWeekYear.value),
     week: Number(els.importWeekWeek.value),
