@@ -4,11 +4,11 @@ Local Bun server for testing code using NeuroInfoAPI against a controllable mock
 
 This project now covers:
 
-- REST API mock endpoints (`/api/v1/...`)
-- WebSocket endpoint + ticket auth flow (`/api/ws`, `/api/ws/ticket`)
+- REST API mock endpoints (`/api/v2/...`)
+- WebSocket endpoint + ticket auth flow (`/api/v2/ws`, `/api/v2/ws/ticket`)
 - Browser UI for editing state and emitting events (`/ui`)
 - JSON persistence (`src/mock-state.json`)
-- Importing real data from upstream NeuroInfoApi via `neuroinfoapi-client`
+- Importing real data from upstream NeuroInfoApi v2 via `neuroinfoapi-client`
 
 ## Quick Start
 
@@ -36,41 +36,57 @@ Alternative script:
 bun run run
 ```
 
-Default URLs:
+Default URLs for `neuroinfoapi-client` v2:
 
 - UI: `http://localhost:8787/ui`
 - Health: `http://localhost:8787/health`
-- REST base: `http://localhost:8787/api/v1`
-- WS endpoint: `ws://localhost:8787/api/ws`
-- Ticket endpoint: `http://localhost:8787/api/ws/ticket`
+- REST base: `http://localhost:8787/api/v2`
+- WS endpoint: `ws://localhost:8787/api/v2/ws`
+- Ticket endpoint: `http://localhost:8787/api/v2/ws/ticket`
+
+
+`neuroinfoapi-client` setup example:
+
+```ts
+import { NeuroInfoApiClient, NeuroInfoApiWebsocketClient } from "neuroinfoapi-client";
+
+const api = new NeuroInfoApiClient("mock-token", {
+  baseUrl: "http://localhost:8787/api/v2",
+});
+
+const ws = new NeuroInfoApiWebsocketClient("mock-token", {
+  baseUrl: "ws://localhost:8787/api/v2/ws",
+  apiBaseUrl: "http://localhost:8787/api/v2",
+});
+```
 
 ## Auth Behavior in Mock Mode
 
 - Protected REST endpoints still require `Authorization: Bearer <token>`.
 - Token content is accepted as-is in mock mode (no real token validation).
 - WS allows either:
-  - ticket (`/api/ws?ticket=...`) or
+  - ticket (`/api/v2/ws?ticket=...`) or
   - bearer token in `Authorization` header.
-- `/api/ws/ticket` requires an auth header and returns a short-lived one-time ticket.
+- `/api/v2/ws/ticket` requires an auth header and returns a short-lived one-time ticket.
 
 ## What Is Mocked
 
 REST routes include (non-exhaustive):
 
 - Twitch
-  - `GET /api/v1/twitch/stream`
-  - `GET /api/v1/twitch/vods`
-  - `GET /api/v1/twitch/vod?streamId=...`
+  - `GET /api/v2/twitch/stream`
+  - `GET /api/v2/twitch/vods`
+  - `GET /api/v2/twitch/vod?id=...` (`streamId` is also accepted)
 - Schedule
-  - `GET /api/v1/schedule`
-  - `GET /api/v1/schedule/latest`
-  - `GET /api/v1/schedule/search`
-  - `GET /api/v1/schedule/devstreamtimes`
-  - `GET /api/v1/schedule/weeks`
+  - `GET /api/v2/schedule`
+  - `GET /api/v2/schedule/latest`
+  - `GET /api/v2/schedule/search`
+  - `GET /api/v2/devstream/times`
+  - `GET /api/v2/schedule/weeks`
 - Subathon
-  - `GET /api/v1/subathon/current`
-  - `GET /api/v1/subathon/years` (supports `?detailed`)
-  - `GET /api/v1/subathon?year=...`
+  - `GET /api/v2/subathon` (active/current subathons)
+  - `GET /api/v2/subathon/years` (returns `Record<year, name>`)
+  - `GET /api/v2/subathon?year=...`
 
 Additional docs/testing parity endpoint:
 
@@ -93,7 +109,7 @@ Changes are persisted to:
 
 Use test helper endpoint:
 
-- `POST /api/v1/__test/import`
+- `POST /api/v2/__test/import`
 
 Payload:
 
@@ -115,6 +131,7 @@ Supported targets:
 - `subathonCurrent`
 - `subathonYear`
 - `devstreamtimes`
+- `blogFeed`
 
 ## WS Protocol (for custom clients)
 
@@ -135,7 +152,7 @@ Outbound message types:
 
 ## Internal Test Endpoints
 
-The mock exposes helper endpoints under `/api/v1/__test/*` for UI and automation, including:
+The mock exposes helper endpoints under `/api/v2/__test/*` for UI and automation. Helpers include:
 
 - state read/write/reset
 - Twitch/Schedule/Subathon upserts

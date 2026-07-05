@@ -4,12 +4,14 @@ import { extractBearerToken, isUnlimitedToken, requireAuthHeader } from "./auth"
 import {
   ALL_EVENT_TYPES,
   ALL_SCHEDULE_DAY_TYPES,
-  BlogFeedResponse,
+  ALL_SCHEDULE_STATUSES,
+  BlogFeedData,
   ConnectionData,
   ImportTarget,
   MockState,
   ScheduleResponse,
   ScheduleSearchResultItem,
+  ScheduleStatus,
   SubathonData,
   TwitchStreamData,
   TwitchVod,
@@ -21,7 +23,7 @@ import { StateStore } from "./stateStore";
 import { TicketStore } from "./tickets";
 import {
   asNumberArray,
-  asBlogFeedResponse,
+  asBlogFeedData,
   asScheduleResponse,
   asSubathonArray,
   asSubathonData,
@@ -54,6 +56,19 @@ const IMPORT_TARGETS: ImportTarget[] = [
   "devstreamtimes",
   "blogFeed",
 ];
+
+function getApiPath(pathname: string): string | null {
+  const match = pathname.match(/^\/api\/v2(\/.*)$/);
+  return match?.[1] ?? null;
+}
+
+function isWsPath(pathname: string): boolean {
+  return getApiPath(pathname) === "/ws";
+}
+
+function isWsTicketPath(pathname: string): boolean {
+  return getApiPath(pathname) === "/ws/ticket";
+}
 
 function jsonResponse(payload: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(payload), {
@@ -105,11 +120,16 @@ function latestScheduleFromState(state: MockState): ScheduleResponse | null {
   return sorted[0] ?? null;
 }
 
-function makeSubathonYears(state: MockState): number[] {
-  return Object.keys(state.subathon.byYear)
+function makeSubathonYears(state: MockState): Record<number, string> {
+  const years: Record<number, string> = {};
+  for (const year of Object.keys(state.subathon.byYear)
     .map((value) => Number(value))
     .filter((value) => Number.isInteger(value))
-    .sort((a, b) => a - b);
+    .sort((a, b) => a - b)) {
+    const entry = state.subathon.byYear[String(year)];
+    if (entry) years[year] = entry.name;
+  }
+  return years;
 }
 
 function makeScheduleWeeksIndex(state: MockState): Record<number, number[]> {
@@ -129,14 +149,12 @@ function makeScheduleWeeksIndex(state: MockState): Record<number, number[]> {
   return result;
 }
 
-function makeBlogFeedResponse(feed: BlogFeedResponse, includeRaw: boolean): BlogFeedResponse {
+function makeBlogFeedResponse(feed: BlogFeedData, includeRaw: boolean): BlogFeedData {
   if (includeRaw) return feed;
 
   return {
-    data: {
-      ...feed.data,
-      entries: feed.data.entries.map(({ rawContent, ...entry }) => entry),
-    },
+    ...feed,
+    entries: feed.entries.map(({ rawContent, ...entry }) => entry),
   };
 }
 
@@ -186,7 +204,7 @@ async function startServer() {
         return new Response(null, { status: 204, headers: CORS_HEADERS });
       }
 
-      if (url.pathname === "/api/ws") {
+      if (isWsPath(url.pathname)) {
         const ticket = url.searchParams.get("ticket");
         let authKey: string | null = null;
 
@@ -230,7 +248,7 @@ async function startServer() {
         return jsonResponse({ status: "ok", service: "nia-mock-test-server" });
       }
 
-      if (url.pathname === "/api/ws/ticket" && request.method === "GET") {
+      if (isWsTicketPath(url.pathname) && request.method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -240,7 +258,7 @@ async function startServer() {
             data: {
               ticket,
               expiresIn: tickets.ttlSeconds,
-              usage: `Connect with ws://localhost:${PORT}/api/ws?ticket=<ticket>`,
+              usage: `Connect with ws://localhost:${PORT}/api/v2/ws?ticket=<ticket>`,
             },
           },
           200,
@@ -250,25 +268,40 @@ async function startServer() {
         );
       }
 
+      if (url.pathname === "/api/info" && request.method === "GET") {
+        return jsonResponse({
+          data: {
+            latestVersion: "v2",
+            versions: {
+              v2: {
+                status: "current",
+                docsUrl: "https://neuro.appstun.net/api/docs",
+              },
+            },
+          },
+        });
+      }
+
       if (url.pathname === "/api/test/geterror" && request.method === "GET") {
         const code = url.searchParams.get("code");
         if (!isApiErrorCode(code)) return jsonResponse({ error: "Not Found" }, 404);
         return jsonResponse(errorPayload(code), 418);
       }
 
-      if (!url.pathname.startsWith("/api/v1/")) {
+      const apiPath = getApiPath(url.pathname);
+      if (!apiPath) {
         return textResponse("Not Found", 404);
       }
 
-      const path = url.pathname;
+      const path = apiPath;
       const method = request.method;
 
-      if (path === "/api/v1/twitch/stream" && method === "GET") {
+      if (path === "/twitch/stream" && method === "GET") {
         const state = stateStore.getSnapshot();
         return jsonResponse(state.twitch.stream, 200, { "Cache-Control": "public, max-age=30" });
       }
 
-      if (path === "/api/v1/twitch/vods" && method === "GET") {
+      if (path === "/twitch/vods" && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -277,11 +310,11 @@ async function startServer() {
         return jsonResponse(state.twitch.vods, 200, { "Cache-Control": "public, max-age=900" });
       }
 
-      if (path === "/api/v1/twitch/vod" && method === "GET") {
+      if (path === "/twitch/vod" && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
-        const streamId = String(url.searchParams.get("streamId") || "").trim();
+        const streamId = String(url.searchParams.get("streamId") || url.searchParams.get("id") || "").trim();
         if (!streamId) return jsonResponse(errorPayload("VD1"), 400);
 
         const state = stateStore.getSnapshot();
@@ -290,7 +323,7 @@ async function startServer() {
         return jsonResponse(vod, 200, { "Cache-Control": "public, max-age=3600" });
       }
 
-      if (path === "/api/v1/schedule" && method === "GET") {
+      if (path === "/schedule" && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -312,7 +345,7 @@ async function startServer() {
         return jsonResponse(schedule, 200, { "Cache-Control": "public, max-age=1800" });
       }
 
-      if (path === "/api/v1/schedule/latest" && method === "GET") {
+      if (path === "/schedule/latest" && method === "GET") {
         const state = stateStore.getSnapshot();
         const latest = latestScheduleFromState(state);
         if (!latest) return jsonResponse(errorPayload("SC1"), 404);
@@ -328,12 +361,12 @@ async function startServer() {
         );
       }
 
-      if (path === "/api/v1/schedule/weeks" && method === "GET") {
+      if (path === "/schedule/weeks" && method === "GET") {
         const state = stateStore.getSnapshot();
         return jsonResponse(makeScheduleWeeksIndex(state), 200, { "Cache-Control": "public, max-age=300" });
       }
 
-      if (path === "/api/v1/schedule/search" && method === "GET") {
+      if (path === "/schedule/search" && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -413,7 +446,7 @@ async function startServer() {
               year: week.year,
               week: week.week,
               schedule: matchedEntries,
-              isFinal: week.isFinal,
+              status: week.status,
             },
           });
         }
@@ -433,12 +466,12 @@ async function startServer() {
         );
       }
 
-      if (path === "/api/v1/schedule/devstreamtimes" && method === "GET") {
+      if (path === "/devstream/times" && method === "GET") {
         const state = stateStore.getSnapshot();
         return jsonResponse(state.schedule.devstreamtimes, 200, { "Cache-Control": "public, max-age=300" });
       }
 
-      if (path === "/api/v1/subathon/current" && method === "GET") {
+      if ((path === "/subathon/current" || (path === "/subathon" && !url.searchParams.has("year"))) && method === "GET") {
         const state = stateStore.getSnapshot();
         const active = Object.values(state.subathon.byYear)
           .filter((entry) => entry.isActive)
@@ -448,21 +481,12 @@ async function startServer() {
         return jsonResponse(active, 200, { "Cache-Control": "public, max-age=60" });
       }
 
-      if (path === "/api/v1/subathon/years" && method === "GET") {
+      if (path === "/subathon/years" && method === "GET") {
         const state = stateStore.getSnapshot();
-        if (url.searchParams.has("detailed")) {
-          const detailedYears: Record<number, string> = {};
-          for (const year of makeSubathonYears(state)) {
-            const entry = state.subathon.byYear[String(year)];
-            if (entry) detailedYears[year] = entry.name;
-          }
-          return jsonResponse(detailedYears, 200, { "Cache-Control": "public, max-age=300" });
-        }
-
         return jsonResponse(makeSubathonYears(state), 200, { "Cache-Control": "public, max-age=300" });
       }
 
-      if (path === "/api/v1/subathon" && method === "GET") {
+      if (path === "/subathon" && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -479,7 +503,7 @@ async function startServer() {
         return jsonResponse(subathon, 200, { "Cache-Control": "private, max-age=300" });
       }
 
-      if (path === "/api/v1/blog/feed" && method === "GET") {
+      if ((path === "/blog/feed" || path === "/blog") && method === "GET") {
         const auth = requireAuthHeader(request);
         if (!auth.ok) return auth.response!;
 
@@ -488,7 +512,7 @@ async function startServer() {
         return jsonResponse(makeBlogFeedResponse(state.blog.feed, includeRaw), 200, { "Cache-Control": "private, max-age=300" });
       }
 
-      if (path === "/api/v1/__test/state" && method === "GET") {
+      if (path === "/__test/state" && method === "GET") {
         return jsonResponse({
           state: stateStore.getSnapshot(),
           ws: {
@@ -499,7 +523,7 @@ async function startServer() {
         });
       }
 
-      if (path === "/api/v1/__test/state" && method === "PUT") {
+      if (path === "/__test/state" && method === "PUT") {
         const body = await parseJsonBody<{ state?: MockState } | MockState>(request);
         if (!body || typeof body !== "object") {
           return jsonResponse({ error: "Invalid payload" }, 400);
@@ -514,12 +538,12 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/reset" && method === "POST") {
+      if (path === "/__test/reset" && method === "POST") {
         stateStore.resetToDefaults();
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/twitch/stream" && method === "PATCH") {
+      if (path === "/__test/twitch/stream" && method === "PATCH") {
         const body = await parseJsonBody<TwitchStreamData>(request);
         if (!body || typeof body !== "object") return jsonResponse({ error: "Invalid payload" }, 400);
 
@@ -527,7 +551,7 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/twitch/vods" && method === "PUT") {
+      if (path === "/__test/twitch/vods" && method === "PUT") {
         const body = await parseJsonBody<TwitchVod[]>(request);
         if (!Array.isArray(body)) return jsonResponse({ error: "Invalid payload" }, 400);
 
@@ -535,12 +559,12 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/schedule" && method === "POST") {
+      if (path === "/__test/schedule" && method === "POST") {
         const body = await parseJsonBody<{
           year: number;
           week: number;
           schedule: ScheduleResponse["schedule"];
-          isFinal?: boolean;
+          status?: ScheduleStatus;
           setAsLatest?: boolean;
         }>(request);
 
@@ -548,11 +572,13 @@ async function startServer() {
           return jsonResponse({ error: "Invalid payload" }, 400);
         }
 
+        const status = body.status && ALL_SCHEDULE_STATUSES.includes(body.status) ? body.status : "auto_twitch";
+
         const schedule: ScheduleResponse = {
           year: body.year,
           week: body.week,
           schedule: body.schedule,
-          isFinal: !!body.isFinal,
+          status,
         };
 
         stateStore.upsertSchedule(schedule, !!body.setAsLatest);
@@ -560,7 +586,7 @@ async function startServer() {
         return jsonResponse({ ok: true, schedule });
       }
 
-      if (path === "/api/v1/__test/schedule" && method === "DELETE") {
+      if (path === "/__test/schedule" && method === "DELETE") {
         const year = Number.parseInt(String(url.searchParams.get("year") || ""), 10);
         const week = Number.parseInt(String(url.searchParams.get("week") || ""), 10);
 
@@ -572,7 +598,7 @@ async function startServer() {
         return jsonResponse({ ok: deleted });
       }
 
-      if (path === "/api/v1/__test/schedule/devstreamtimes" && method === "PUT") {
+      if (path === "/__test/schedule/devstreamtimes" && method === "PUT") {
         const body = await parseJsonBody<number[]>(request);
         if (!Array.isArray(body) || body.some((entry) => typeof entry !== "number" || !Number.isFinite(entry))) {
           return jsonResponse({ error: "Invalid payload" }, 400);
@@ -582,7 +608,7 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/subathon" && method === "PATCH") {
+      if (path === "/__test/subathon" && method === "PATCH") {
         const body = await parseJsonBody<SubathonData>(request);
         if (!body || !Number.isInteger(body.year) || typeof body.name !== "string") {
           return jsonResponse({ error: "Invalid payload" }, 400);
@@ -593,7 +619,7 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/subathon" && method === "DELETE") {
+      if (path === "/__test/subathon" && method === "DELETE") {
         const year = Number.parseInt(String(url.searchParams.get("year") || ""), 10);
         if (!Number.isInteger(year)) return jsonResponse({ error: "year is required" }, 400);
 
@@ -601,17 +627,17 @@ async function startServer() {
         return jsonResponse({ ok: deleted });
       }
 
-      if (path === "/api/v1/__test/blog/feed" && method === "PUT") {
-        const body = await parseJsonBody<BlogFeedResponse>(request);
-        const feed = asBlogFeedResponse(body);
+      if (path === "/__test/blog/feed" && method === "PUT") {
+        const body = await parseJsonBody<BlogFeedData>(request);
+        const feed = asBlogFeedData(body);
         if (!feed) return jsonResponse({ error: "Invalid payload" }, 400);
 
         stateStore.setBlogFeed(feed);
-        wsHub.broadcast("blogFeedUpdate", feed.data);
+        wsHub.broadcast("blogFeedUpdate", feed);
         return jsonResponse({ ok: true });
       }
 
-      if (path === "/api/v1/__test/emit" && method === "POST") {
+      if (path === "/__test/emit" && method === "POST") {
         const body = await parseJsonBody<{ eventType: WsEventType; eventData: unknown; timestamp?: number }>(request);
         if (!body || !isWsEventType(body.eventType)) return jsonResponse({ error: "Invalid eventType" }, 400);
 
@@ -620,7 +646,7 @@ async function startServer() {
         return jsonResponse({ ok: true, eventType: body.eventType, timestamp });
       }
 
-      if (path === "/api/v1/__test/import" && method === "POST") {
+      if (path === "/__test/import" && method === "POST") {
         const body = await parseJsonBody<{ target: ImportTarget; token: string; year?: number; week?: number; raw?: boolean }>(request);
         if (!body || !isImportTarget(body.target) || typeof body.token !== "string") {
           return jsonResponse({ error: "Invalid payload" }, 400);
@@ -690,10 +716,10 @@ async function startServer() {
             break;
           }
           case "blogFeed": {
-            const feed = asBlogFeedResponse(result.data);
+            const feed = asBlogFeedData(result.data);
             if (!feed) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
             stateStore.setBlogFeed(feed);
-            wsHub.broadcast("blogFeedUpdate", feed.data);
+            wsHub.broadcast("blogFeedUpdate", feed);
             break;
           }
         }
@@ -756,9 +782,9 @@ async function startServer() {
 
   console.log("[nia-mock] server running");
   console.log(`[nia-mock] UI: http://localhost:${PORT}/ui`);
-  console.log(`[nia-mock] REST: http://localhost:${PORT}/api/v1`);
-  console.log(`[nia-mock] WS: ws://localhost:${PORT}/api/ws`);
-  console.log(`[nia-mock] Ticket: http://localhost:${PORT}/api/ws/ticket`);
+  console.log(`[nia-mock] REST: http://localhost:${PORT}/api/v2`);
+  console.log(`[nia-mock] WS: ws://localhost:${PORT}/api/v2/ws`);
+  console.log(`[nia-mock] Ticket: http://localhost:${PORT}/api/v2/ws/ticket`);
 }
 
 void startServer();

@@ -1,114 +1,65 @@
-export type ScheduleDayType = "normal" | "offline" | "canceled" | "TBD" | "unknown";
+import type {
+  BlogFeedData,
+  BlogFeedEntry,
+  BlogEntryBodySection,
+  ScheduleEntry,
+  ScheduleLatestResponse,
+  ScheduleResponse,
+  ScheduleSearchCursor,
+  ScheduleSearchResultItem,
+  ScheduleSearchResponse,
+  ScheduleStatus,
+  ScheduleWeeksResponse,
+  SubathonData,
+  SubathonGoal,
+  SubathonYearsResponse,
+  TwitchStreamData,
+  TwitchVod,
+  WsEventDataMap,
+  WsEventType,
+  WsInvalidReason,
+} from "neuroinfoapi-client";
 
-export interface ScheduleEntry {
-  day: number;
-  time: number;
-  message: string;
-  type: ScheduleDayType;
-}
+export type {
+  BlogFeedData,
+  BlogFeedEntry,
+  BlogEntryBodySection,
+  ScheduleEntry,
+  ScheduleLatestResponse,
+  ScheduleResponse,
+  ScheduleSearchCursor,
+  ScheduleSearchResultItem,
+  ScheduleSearchResponse,
+  ScheduleStatus,
+  ScheduleWeeksResponse,
+  SubathonData,
+  SubathonGoal,
+  SubathonYearsResponse,
+  TwitchStreamData,
+  TwitchVod,
+  WsEventDataMap,
+  WsEventType,
+  WsInvalidReason,
+};
 
-export interface ScheduleResponse {
-  year: number;
-  week: number;
-  schedule: ScheduleEntry[];
-  isFinal: boolean;
-}
+export type ScheduleDayType = ScheduleEntry["type"];
 
-export interface ScheduleLatestResponse extends ScheduleResponse {
-  hasActiveSubathon: boolean;
-}
+export const ALL_SCHEDULE_STATUSES = ["auto_twitch", "auto_discord", "confirmed"] as const satisfies readonly ScheduleStatus[];
 
-export type ScheduleWeeksResponse = Record<number, number[]>;
+export const ALL_SCHEDULE_DAY_TYPES = ["normal", "offline", "canceled", "TBD", "unknown"] as const satisfies readonly ScheduleDayType[];
 
-export interface ScheduleSearchCursor {
-  year: number;
-  week: number;
-}
-
-export interface ScheduleSearchResultItem {
-  foundDays: number[];
-  data: ScheduleResponse;
-}
-
-export interface ScheduleSearchResponse {
-  nextCursor: ScheduleSearchCursor | null;
-  results: ScheduleSearchResultItem[];
-}
-
-export interface TwitchStreamData {
-  isLive: boolean;
-  id?: string;
-  title?: string;
-  game?: {
-    id: string;
-    name: string;
-  };
-  language?: string;
-  tags?: string[];
-  isMature?: boolean;
-  viewerCount?: number;
-  startedAt?: number;
-  thumbnailUrl?: string;
-}
-
-export interface TwitchVod {
-  id: string;
-  streamId: string;
-  title: string;
-  url: string;
-  viewable: string;
-  type: string;
-  language: string;
-  duration: string;
-  viewCount: number;
-  createdAt: number;
-  publishedAt: number;
-  thumbnailUrl: string;
-}
-
-export interface SubathonGoal {
-  name: string;
-  completed: boolean;
-  reached: boolean;
-}
-
-export interface SubathonData {
-  year: number;
-  name: string;
-  subcount: number;
-  goals: { [goalNumber: number]: SubathonGoal };
-  isActive: boolean;
-  startTimestamp?: number;
-  endTimestamp?: number;
-}
-
-export interface BlogEntryBodySection {
-  header: string;
-  body: string;
-}
-
-export interface BlogFeedEntry {
-  title: string;
-  author: string;
-  url: string;
-  published: number;
-  updated: number;
-  content?: BlogEntryBodySection[];
-  rawContent?: string;
-  summary: string;
-}
-
-export interface BlogFeedData {
-  url: string;
-  lastUpdated: number;
-  title: string;
-  subtitle: string;
-  entries: BlogFeedEntry[];
-}
-
-export interface BlogFeedResponse {
-  data: BlogFeedData;
-}
+export const ALL_EVENT_TYPES: readonly WsEventType[] = [
+  "blogFeedUpdate",
+  "scheduleUpdate",
+  "subathonUpdate",
+  "subathonGoalUpdate",
+  "streamOnline",
+  "streamUpdate",
+  "streamOffline",
+  "secretneuroaccountOnline",
+  "streamRaidIncoming",
+  "streamRaidOutgoing",
+] as const;
 
 export interface MockState {
   version: 1;
@@ -126,111 +77,9 @@ export interface MockState {
     byYear: Record<string, SubathonData>;
   };
   blog: {
-    feed: BlogFeedResponse;
+    feed: BlogFeedData;
   };
 }
-
-export type WsEventType =
-  | "blogFeedUpdate"
-  | "scheduleUpdate"
-  | "subathonUpdate"
-  | "subathonGoalUpdate"
-  | "streamOnline"
-  | "streamUpdate"
-  | "streamOffline"
-  | "secretneuroaccountOnline"
-  | "streamRaidIncoming"
-  | "streamRaidOutgoing";
-
-export type WsInvalidReason =
-  | "malformed"
-  | "unauthenticated"
-  | "missingEventtype"
-  | "invalidEventtype"
-  | "missingToken"
-  | "invalidToken"
-  | "authError";
-
-export interface WsEventDataMap {
-  blogFeedUpdate: BlogFeedData;
-  streamOnline: {
-    isLive: true;
-    id: string;
-    title: string;
-    game: { id: string; name: string };
-    language: string;
-    tags: string[];
-    isMature: boolean;
-    viewerCount: number;
-    startedAt: number;
-    thumbnailUrl: string;
-  };
-  streamOffline: {
-    isLive: false;
-  };
-  streamUpdate: {
-    title: string;
-    game: { id: string; name: string };
-    language: string;
-    isMature: boolean;
-  };
-  secretneuroaccountOnline: {
-    isLive: true;
-    id: string;
-    title: string;
-    game: { id: string; name: string };
-    language: string;
-    tags: string[];
-    isMature: boolean;
-    viewerCount: number;
-    startedAt: number;
-    thumbnailUrl: string;
-  };
-  streamRaidIncoming: {
-    channel: { displayName: string; name: string; id: string };
-    viewerCount: number;
-  };
-  streamRaidOutgoing: {
-    channel: { displayName: string; name: string; id: string };
-    viewerCount: number;
-  };
-  scheduleUpdate: {
-    year: number;
-    week: number;
-    schedule: ScheduleEntry[];
-    isFinal: boolean;
-  };
-  subathonUpdate: {
-    year: number;
-    name: string;
-    subcount: number;
-    goals: { [goal: number]: SubathonGoal };
-    isActive: boolean;
-    startTimestamp?: number;
-    endTimestamp?: number;
-  };
-  subathonGoalUpdate: {
-    year: number;
-    goalNumber: number;
-    goal: SubathonGoal;
-    subcount: number;
-  };
-}
-
-export const ALL_EVENT_TYPES: readonly WsEventType[] = [
-  "blogFeedUpdate",
-  "scheduleUpdate",
-  "subathonUpdate",
-  "subathonGoalUpdate",
-  "streamOnline",
-  "streamUpdate",
-  "streamOffline",
-  "secretneuroaccountOnline",
-  "streamRaidIncoming",
-  "streamRaidOutgoing",
-] as const;
-
-export const ALL_SCHEDULE_DAY_TYPES: readonly ScheduleDayType[] = ["normal", "offline", "canceled", "TBD", "unknown"] as const;
 
 export type ApiErrorCode =
   | "AP1"
@@ -259,6 +108,8 @@ export interface ApiErrorPayload {
   error: {
     code: ApiErrorCode;
     message: string;
+    timestamp: number;
+    path: string;
   };
 }
 

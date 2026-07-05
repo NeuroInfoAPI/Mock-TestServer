@@ -1,5 +1,11 @@
 import { errorPayload } from "./errors";
 
+const AUTH_ERROR_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type",
+};
+
 export interface AuthResult {
   ok: boolean;
   token?: string;
@@ -18,7 +24,7 @@ export function requireAuthHeader(request: Request): AuthResult {
   if (!token) {
     return {
       ok: false,
-      response: Response.json(errorPayload("AU1"), { status: 401 }),
+      response: Response.json(errorPayload("AU1"), { status: 401, headers: AUTH_ERROR_HEADERS }),
     };
   }
 

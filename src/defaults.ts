@@ -1,4 +1,4 @@
-import { BlogFeedResponse, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -68,7 +68,7 @@ function buildScheduleFromWeekStart(weekStart: Date, year: number, week: number,
   return {
     year,
     week,
-    isFinal: seed % 2 === 0,
+    status: seed % 2 === 0 ? "confirmed" : "auto_twitch",
     schedule: entries.map((entry) => ({
       day: entry.day,
       time: weekStart.getTime() + entry.day * DAY_MS + entry.hour * 60 * 60 * 1000 + entry.minute * 60 * 1000,
@@ -165,30 +165,28 @@ function createDefaultSubathons(now: number, year: number): Record<string, Subat
   };
 }
 
-function createDefaultBlogFeed(now: number): BlogFeedResponse {
+function createDefaultBlogFeed(now: number): BlogFeedData {
   return {
-    data: {
-      url: "https://neurosama.com/blog/feed",
-      lastUpdated: now,
-      title: "Neuro-sama Blog",
-      subtitle: "Local mock blog feed",
-      entries: [
-        {
-          title: "Mock blog entry",
-          author: "NIA Mock",
-          url: "https://neuro.appstun.net/blog/mock-entry",
-          published: now - DAY_MS,
-          updated: now - DAY_MS,
-          summary: "Example blog entry returned by the local mock server.",
-          content: [
-            {
-              header: "Overview",
-              body: "This placeholder keeps the mock shape aligned with neuroinfoapi-client.",
-            },
-          ],
-        },
-      ],
-    },
+    url: "https://neurosama.com/blog/feed",
+    lastUpdated: now,
+    title: "Neuro-sama Blog",
+    subtitle: "Local mock blog feed",
+    entries: [
+      {
+        title: "Mock blog entry",
+        author: "NIA Mock",
+        url: "https://neuro.appstun.net/blog/mock-entry",
+        published: now - DAY_MS,
+        updated: now - DAY_MS,
+        summary: "Example blog entry returned by the local mock server.",
+        content: [
+          {
+            header: "Overview",
+            body: "This placeholder keeps the mock shape aligned with neuroinfoapi-client.",
+          },
+        ],
+      },
+    ],
   };
 }
 

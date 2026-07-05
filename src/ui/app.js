@@ -26,7 +26,7 @@ const els = {
 
   scheduleYear: $("scheduleYear"),
   scheduleWeek: $("scheduleWeek"),
-  scheduleFinal: $("scheduleFinal"),
+  scheduleStatus: $("scheduleStatus"),
   scheduleLatest: $("scheduleLatest"),
   scheduleEditor: $("scheduleEditor"),
   devstreamEditor: $("devstreamEditor"),
@@ -154,8 +154,8 @@ function fillFromSnapshot() {
       latestScheduleKey: snap.schedule.latestKey,
       scheduleKeys: Object.keys(snap.schedule.weeks),
       subathonYears: Object.keys(snap.subathon.byYear),
-      blogEntries: snap.blog?.feed?.data?.entries?.length ?? 0,
-      blogLastUpdated: snap.blog?.feed?.data?.lastUpdated ?? null,
+      blogEntries: snap.blog?.feed?.entries?.length ?? 0,
+      blogLastUpdated: snap.blog?.feed?.lastUpdated ?? null,
     },
     null,
     2,
@@ -181,7 +181,7 @@ function fillFromSnapshot() {
   const pickedWeek = getScheduleByInput();
   if (pickedWeek) {
     els.scheduleEditor.value = JSON.stringify(pickedWeek.schedule, null, 2);
-    els.scheduleFinal.checked = !!pickedWeek.isFinal;
+    els.scheduleStatus.value = pickedWeek.status || "auto_twitch";
   }
 
   // Subathon
@@ -242,7 +242,7 @@ function getDefaultEventPayload(eventType) {
     scheduleUpdate: {
       year: Number(els.scheduleYear.value) || new Date().getUTCFullYear(),
       week: Number(els.scheduleWeek.value) || 1,
-      isFinal: els.scheduleFinal.checked,
+      status: els.scheduleStatus.value || "auto_twitch",
       schedule: (() => {
         try {
           return parseJsonEditor(els.scheduleEditor, "schedule");
@@ -308,7 +308,7 @@ function getDefaultEventPayload(eventType) {
 /* ─── Core actions ─── */
 async function refreshAll() {
   const health = await requestJson("/health");
-  const snapshot = await requestJson("/api/v1/__test/state");
+  const snapshot = await requestJson("/api/v2/__test/state");
   state.snapshot = { health: health.status, ...snapshot };
   fillFromSnapshot();
 }
@@ -317,7 +317,7 @@ async function doImport(target, extra = {}) {
   const token = getToken();
   if (!token) throw new Error("Paste a real NIA token first (sidebar).");
 
-  await requestJson("/api/v1/__test/import", {
+  await requestJson("/api/v2/__test/import", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ target, token, ...extra }),
@@ -366,7 +366,7 @@ function bindEvents() {
   $("resetState").addEventListener("click", async () => {
     if (!confirm("Reset mock state to defaults?")) return;
     await withLoading("resetState", async () => {
-      await requestJson("/api/v1/__test/reset", { method: "POST" });
+      await requestJson("/api/v2/__test/reset", { method: "POST" });
       await refreshAll();
       log("State reset to defaults");
     }).catch((e) => log(e.message, "err"));
@@ -400,7 +400,7 @@ function bindEvents() {
   $("saveStream").addEventListener("click", () =>
     withLoading("saveStream", async () => {
       const payload = parseJsonEditor(els.streamEditor, "stream");
-      await requestJson("/api/v1/__test/twitch/stream", {
+      await requestJson("/api/v2/__test/twitch/stream", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -413,7 +413,7 @@ function bindEvents() {
   $("saveVods").addEventListener("click", () =>
     withLoading("saveVods", async () => {
       const payload = parseJsonEditor(els.vodsEditor, "vods");
-      await requestJson("/api/v1/__test/twitch/vods", {
+      await requestJson("/api/v2/__test/twitch/vods", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -431,7 +431,7 @@ function bindEvents() {
       return;
     }
     els.scheduleEditor.value = JSON.stringify(week.schedule, null, 2);
-    els.scheduleFinal.checked = !!week.isFinal;
+    els.scheduleStatus.value = week.status || "auto_twitch";
     log("Loaded week from local state");
   });
 
@@ -440,14 +440,14 @@ function bindEvents() {
       const year = Number(els.scheduleYear.value);
       const week = Number(els.scheduleWeek.value);
       const schedule = parseJsonEditor(els.scheduleEditor, "schedule entries");
-      await requestJson("/api/v1/__test/schedule", {
+      await requestJson("/api/v2/__test/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           year,
           week,
           schedule,
-          isFinal: !!els.scheduleFinal.checked,
+          status: els.scheduleStatus.value || "auto_twitch",
           setAsLatest: !!els.scheduleLatest.checked,
         }),
       });
@@ -460,7 +460,7 @@ function bindEvents() {
     withLoading("deleteSchedule", async () => {
       const year = Number(els.scheduleYear.value);
       const week = Number(els.scheduleWeek.value);
-      await requestJson(`/api/v1/__test/schedule?year=${year}&week=${week}`, { method: "DELETE" });
+      await requestJson(`/api/v2/__test/schedule?year=${year}&week=${week}`, { method: "DELETE" });
       await refreshAll();
       log(`Deleted schedule ${year}/W${week}`);
     }).catch((e) => log(e.message, "err")),
@@ -469,7 +469,7 @@ function bindEvents() {
   $("saveDevstream").addEventListener("click", () =>
     withLoading("saveDevstream", async () => {
       const payload = parseJsonEditor(els.devstreamEditor, "devstreamtimes");
-      await requestJson("/api/v1/__test/schedule/devstreamtimes", {
+      await requestJson("/api/v2/__test/schedule/devstreamtimes", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -494,7 +494,7 @@ function bindEvents() {
   $("saveSubathon").addEventListener("click", () =>
     withLoading("saveSubathon", async () => {
       const payload = parseJsonEditor(els.subathonEditor, "subathon");
-      await requestJson("/api/v1/__test/subathon", {
+      await requestJson("/api/v2/__test/subathon", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -507,7 +507,7 @@ function bindEvents() {
   $("deleteSubathon").addEventListener("click", () =>
     withLoading("deleteSubathon", async () => {
       const year = Number(els.subathonYear.value);
-      await requestJson(`/api/v1/__test/subathon?year=${year}`, { method: "DELETE" });
+      await requestJson(`/api/v2/__test/subathon?year=${year}`, { method: "DELETE" });
       await refreshAll();
       log(`Deleted subathon year ${year}`);
     }).catch((e) => log(e.message, "err")),
@@ -525,7 +525,7 @@ function bindEvents() {
       const payload = parseJsonEditor(els.eventEditor, "event payload");
       const timestampRaw = (els.eventTimestamp.value || "").trim();
       const timestamp = timestampRaw.length > 0 ? Number(timestampRaw) : undefined;
-      await requestJson("/api/v1/__test/emit", {
+      await requestJson("/api/v2/__test/emit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventType: els.eventType.value, eventData: payload, timestamp }),
@@ -538,7 +538,7 @@ function bindEvents() {
   $("saveState").addEventListener("click", () =>
     withLoading("saveState", async () => {
       const payload = parseJsonEditor(els.stateEditor, "mock state");
-      await requestJson("/api/v1/__test/state", {
+      await requestJson("/api/v2/__test/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state: payload }),

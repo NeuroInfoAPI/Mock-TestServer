@@ -159,7 +159,7 @@
             <div class="col">
               <div class="editor-head">
                 <span class="section-label">Stream</span>
-                <code class="endpoint">GET /api/v1/twitch/stream</code>
+                <code class="endpoint">GET /api/v2/twitch/stream</code>
               </div>
               <textarea id="streamEditor" class="editor" spellcheck="false"></textarea>
               <div class="editor-foot">
@@ -169,7 +169,7 @@
             <div class="col">
               <div class="editor-head">
                 <span class="section-label">VODs</span>
-                <code class="endpoint">GET /api/v1/twitch/vods</code>
+                <code class="endpoint">GET /api/v2/twitch/vods</code>
               </div>
               <textarea id="vodsEditor" class="editor" spellcheck="false"></textarea>
               <div class="editor-foot">
@@ -189,14 +189,21 @@
             <div class="col">
               <div class="editor-head">
                 <span class="section-label">Weekly schedule</span>
-                <code class="endpoint">GET /api/v1/schedule</code>
+                <code class="endpoint">GET /api/v2/schedule</code>
               </div>
               <div class="toolbar">
                 <input id="scheduleYear" type="number" placeholder="year" class="input-sm" />
                 <input id="scheduleWeek" type="number" min="1" max="53" placeholder="week" class="input-sm" />
                 <button id="loadWeek" class="btn-sm">Load</button>
                 <div class="toolbar-sep"></div>
-                <label class="toggle-label"><input id="scheduleFinal" type="checkbox" /> isFinal</label>
+                <label class="toggle-label">
+                  <select id="scheduleStatus" class="input-sm">
+                    <option value="auto_twitch">auto_twitch</option>
+                    <option value="auto_discord">auto_discord</option>
+                    <option value="confirmed">confirmed</option>
+                  </select>
+                  status
+                </label>
                 <label class="toggle-label"><input id="scheduleLatest" type="checkbox" checked /> latest</label>
               </div>
               <textarea id="scheduleEditor" class="editor" spellcheck="false"></textarea>
@@ -208,7 +215,7 @@
             <div class="col">
               <div class="editor-head">
                 <span class="section-label">Devstream times</span>
-                <code class="endpoint">GET /api/v1/schedule/devstreamtimes</code>
+                <code class="endpoint">GET /api/v2/devstream/times</code>
               </div>
               <textarea id="devstreamEditor" class="editor" spellcheck="false"></textarea>
               <div class="editor-foot">
@@ -228,7 +235,7 @@
             <div class="col">
               <div class="editor-head">
                 <span class="section-label">Subathon by year</span>
-                <code class="endpoint">GET /api/v1/subathon</code>
+                <code class="endpoint">GET /api/v2/subathon</code>
               </div>
               <div class="toolbar">
                 <input id="subathonYear" type="number" placeholder="year" class="input-sm" />

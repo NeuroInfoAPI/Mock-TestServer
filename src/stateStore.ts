@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { mkdir, rename } from "node:fs/promises";
-import { BlogFeedResponse, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 import { compareYearWeek, createDefaultMockState, deepClone, getScheduleKey, splitScheduleKey } from "./defaults";
 
 export class StateStore {
@@ -27,7 +27,12 @@ export class StateStore {
     try {
       const parsed = (await file.json()) as MockState;
       if (!parsed || parsed.version !== 1) throw new Error("Unsupported state version");
-      return new StateStore(filePath, sanitizeState(parsed));
+      const sanitized = sanitizeState(parsed);
+      const store = new StateStore(filePath, sanitized);
+      if (stateNeedsPersistenceMigration(parsed, sanitized)) {
+        await store.saveNow();
+      }
+      return store;
     } catch {
       const defaults = createDefaultMockState();
       const store = new StateStore(filePath, defaults);
@@ -110,7 +115,7 @@ export class StateStore {
     return true;
   }
 
-  setBlogFeed(feed: BlogFeedResponse): void {
+  setBlogFeed(feed: BlogFeedData): void {
     this.state.blog.feed = deepClone(feed);
     this.bumpAndSave();
   }
@@ -160,6 +165,10 @@ export class StateStore {
   }
 }
 
+function stateNeedsPersistenceMigration(before: MockState, after: MockState): boolean {
+  return JSON.stringify(before) !== JSON.stringify(after);
+}
+
 function hasErrorCode(error: unknown, code: string): boolean {
   return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === code;
 }
@@ -190,7 +199,41 @@ function sanitizeState(state: MockState): MockState {
   next.schedule.devstreamtimes = Array.isArray(next.schedule.devstreamtimes) ? next.schedule.devstreamtimes : [];
 
   next.subathon.byYear = next.subathon.byYear ?? {};
-  next.blog.feed = next.blog.feed ?? createDefaultMockState().blog.feed;
+  next.blog.feed = normalizeBlogFeed(next.blog.feed) ?? createDefaultMockState().blog.feed;
+  next.schedule.weeks = migrateScheduleWeeks(next.schedule.weeks);
 
   return next;
+}
+
+function normalizeBlogFeed(feed: unknown): BlogFeedData | null {
+  if (!feed || typeof feed !== "object") return null;
+
+  const maybeWrapped = feed as { data?: BlogFeedData };
+  if (maybeWrapped.data && Array.isArray(maybeWrapped.data.entries)) {
+    return maybeWrapped.data;
+  }
+
+  if (Array.isArray((feed as BlogFeedData).entries)) {
+    return feed as BlogFeedData;
+  }
+
+  return null;
+}
+
+function migrateScheduleWeeks(weeks: Record<string, ScheduleResponse>): Record<string, ScheduleResponse> {
+  const migrated: Record<string, ScheduleResponse> = {};
+
+  for (const [key, schedule] of Object.entries(weeks)) {
+    const legacy = schedule as ScheduleResponse & { isFinal?: boolean };
+    const status = legacy.status ?? (legacy.isFinal ? "confirmed" : "auto_twitch");
+
+    migrated[key] = {
+      year: schedule.year,
+      week: schedule.week,
+      schedule: schedule.schedule,
+      status,
+    };
+  }
+
+  return migrated;
 }

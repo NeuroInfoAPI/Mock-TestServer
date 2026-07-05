@@ -1,7 +1,7 @@
 import { NeuroInfoApiClient } from "neuroinfoapi-client";
-import { BlogFeedResponse, ImportTarget, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedData, ImportTarget, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 
-const API_BASE_URL = "https://neuro.appstun.net/api/v1";
+const API_BASE_URL = "https://neuro.appstun.net/api/v2";
 
 export type ImportRequest = {
   target: ImportTarget;
@@ -67,16 +67,6 @@ async function callWithClient<T>(
   }
 }
 
-async function callApiInstance(token: string | null, path: string): Promise<ImportResult> {
-  try {
-    const client = createClient(token);
-    const data = await client.apiInstance(path);
-    return { ok: true, data };
-  } catch (error) {
-    return toImportError(error);
-  }
-}
-
 export async function importFromUpstream(input: ImportRequest): Promise<ImportResult> {
   switch (input.target) {
     case "stream":
@@ -97,7 +87,7 @@ export async function importFromUpstream(input: ImportRequest): Promise<ImportRe
           message: "week must be between 1 and 53",
         };
       }
-      return callWithClient(input.token, (client) => client.getSchedule(input.year, input.week));
+      return callWithClient(input.token, (client) => client.getSchedule(input.week!, input.year));
     }
 
     case "subathonCurrent":
@@ -116,7 +106,7 @@ export async function importFromUpstream(input: ImportRequest): Promise<ImportRe
     }
 
     case "devstreamtimes":
-      return callApiInstance(null, "/schedule/devstreamtimes");
+      return callWithClient(null, (client) => client.getDevstreamTimes());
 
     case "blogFeed":
       return callWithClient(input.token, (client) => client.getBlogFeed(!!input.raw));
@@ -162,10 +152,8 @@ export function asNumberArray(value: unknown): number[] | null {
   return value as number[];
 }
 
-export function asBlogFeedResponse(value: unknown): BlogFeedResponse | null {
+export function asBlogFeedData(value: unknown): BlogFeedData | null {
   if (!value || typeof value !== "object") return null;
-  const data = (value as { data?: unknown }).data;
-  if (!data || typeof data !== "object") return null;
-  if (!Array.isArray((data as { entries?: unknown }).entries)) return null;
-  return value as BlogFeedResponse;
+  if (!Array.isArray((value as { entries?: unknown }).entries)) return null;
+  return value as BlogFeedData;
 }

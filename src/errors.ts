@@ -28,11 +28,13 @@ export function isApiErrorCode(value: unknown): value is ApiErrorCode {
   return typeof value === "string" && value in MESSAGES;
 }
 
-export function errorPayload(code: ApiErrorCode): ApiErrorPayload {
+export function errorPayload(code: ApiErrorCode, path = "/api/v2"): ApiErrorPayload {
   return {
     error: {
       code,
       message: MESSAGES[code],
+      timestamp: Date.now(),
+      path,
     },
   };
 }
