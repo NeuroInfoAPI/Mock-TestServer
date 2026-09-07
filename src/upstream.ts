@@ -1,7 +1,7 @@
 import { NeuroInfoApiClient } from "neuroinfoapi-client";
-import { BlogFeedData, ImportTarget, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedData, ImportTarget, isXFeedAccount, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod, XFeedAccount, XFeedEntry } from "./contracts";
 
-const API_BASE_URL = "https://neuro.appstun.net/api/v2";
+const API_BASE_URL = "neuro.appstun.net/api/v2";
 
 export type ImportRequest = {
   target: ImportTarget;
@@ -9,6 +9,7 @@ export type ImportRequest = {
   year?: number;
   week?: number;
   raw?: boolean;
+  user?: XFeedAccount;
 };
 
 export type ImportResult =
@@ -24,7 +25,7 @@ type ClientCallResult<T> = { data: T | null; error: unknown | null };
 
 function createClient(token: string | null): NeuroInfoApiClient {
   const trimmedToken = token?.trim() || undefined;
-  return new NeuroInfoApiClient(trimmedToken, { baseUrl: API_BASE_URL });
+  return new NeuroInfoApiClient(trimmedToken, { apiBaseUrl: API_BASE_URL, useTls: true });
 }
 
 function toImportError(error: unknown): Exclude<ImportResult, { ok: true }> {
@@ -111,6 +112,10 @@ export async function importFromUpstream(input: ImportRequest): Promise<ImportRe
     case "blogFeed":
       return callWithClient(input.token, (client) => client.getBlogFeed(!!input.raw));
 
+    case "xFeed":
+      if (!isXFeedAccount(input.user)) return { ok: false, status: 400, details: null, message: "A supported X feed user is required" };
+      return callWithClient(input.token, (client) => client.getXFeed(input.user!));
+
     default:
       return {
         ok: false,
@@ -156,4 +161,14 @@ export function asBlogFeedData(value: unknown): BlogFeedData | null {
   if (!value || typeof value !== "object") return null;
   if (!Array.isArray((value as { entries?: unknown }).entries)) return null;
   return value as BlogFeedData;
+}
+
+export function asXFeedEntries(value: unknown): XFeedEntry[] | null {
+  if (!Array.isArray(value)) return null;
+  for (const entry of value) {
+    if (!entry || typeof entry.id !== "string" || !["tweet", "reply", "retweet"].includes(entry.type)) return null;
+    if (typeof entry.author?.username !== "string" || typeof entry.url !== "string" || typeof entry.content !== "string") return null;
+    if (!Number.isFinite(entry.createdTimestamp) || !Array.isArray(entry.media)) return null;
+  }
+  return value as XFeedEntry[];
 }

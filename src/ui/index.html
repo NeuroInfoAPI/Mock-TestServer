@@ -68,6 +68,7 @@
             </svg>
             Subathon
           </button>
+          <button data-tab="xFeed">X Feed</button>
           <button data-tab="events">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
@@ -206,6 +207,10 @@
                 </label>
                 <label class="toggle-label"><input id="scheduleLatest" type="checkbox" checked /> latest</label>
               </div>
+              <div class="toolbar">
+                <label for="scheduleImageUrl">Image URL</label>
+                <input id="scheduleImageUrl" type="url" placeholder="Optional schedule image URL" />
+              </div>
               <textarea id="scheduleEditor" class="editor" spellcheck="false"></textarea>
               <div class="editor-foot">
                 <button id="deleteSchedule" class="btn-sm btn-sm--danger">Delete week</button>
@@ -251,6 +256,30 @@
               <div class="section-label">Active subathons preview</div>
               <pre id="subathonPreview" class="code-block"></pre>
             </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="xFeed">
+          <div class="panel-head">
+            <h2>X Feed</h2>
+            <p>Edit cached posts for each account. Saving new post IDs also emits X feed events.</p>
+          </div>
+          <div class="editor-head">
+            <span class="section-label">Feed entries</span>
+            <code class="endpoint">GET /api/v2/x-feed?user=...</code>
+          </div>
+          <div class="toolbar">
+            <select id="xFeedUser" class="input-sm" aria-label="X account">
+              <option value="NeurosamaAI">NeurosamaAI</option>
+              <option value="EvilNeuroAI">EvilNeuroAI</option>
+              <option value="Vedal987">Vedal987</option>
+            </select>
+            <button id="importXFeed" class="btn-sm">Import from real API</button>
+            <button id="exampleXFeed" class="btn-sm">Load example</button>
+          </div>
+          <textarea id="xFeedEditor" class="editor" spellcheck="false"></textarea>
+          <div class="editor-foot">
+            <button id="saveXFeed" class="btn-action">Save feed</button>
           </div>
         </section>
 

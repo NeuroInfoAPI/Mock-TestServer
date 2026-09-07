@@ -27,6 +27,7 @@ const els = {
   scheduleYear: $("scheduleYear"),
   scheduleWeek: $("scheduleWeek"),
   scheduleStatus: $("scheduleStatus"),
+  scheduleImageUrl: $("scheduleImageUrl"),
   scheduleLatest: $("scheduleLatest"),
   scheduleEditor: $("scheduleEditor"),
   devstreamEditor: $("devstreamEditor"),
@@ -34,6 +35,9 @@ const els = {
   subathonYear: $("subathonYear"),
   subathonEditor: $("subathonEditor"),
   subathonPreview: $("subathonPreview"),
+
+  xFeedUser: $("xFeedUser"),
+  xFeedEditor: $("xFeedEditor"),
 
   eventType: $("eventType"),
   eventTimestamp: $("eventTimestamp"),
@@ -156,6 +160,7 @@ function fillFromSnapshot() {
       subathonYears: Object.keys(snap.subathon.byYear),
       blogEntries: snap.blog?.feed?.entries?.length ?? 0,
       blogLastUpdated: snap.blog?.feed?.lastUpdated ?? null,
+      xFeedEntries: Object.fromEntries(Object.entries(snap.xFeed).map(([user, entries]) => [user, entries.length])),
     },
     null,
     2,
@@ -164,6 +169,7 @@ function fillFromSnapshot() {
   // Twitch editors
   els.streamEditor.value = JSON.stringify(snap.twitch.stream, null, 2);
   els.vodsEditor.value = JSON.stringify(snap.twitch.vods, null, 2);
+  els.xFeedEditor.value = JSON.stringify(snap.xFeed[els.xFeedUser.value] || [], null, 2);
 
   // Devstream
   els.devstreamEditor.value = JSON.stringify(snap.schedule.devstreamtimes, null, 2);
@@ -182,6 +188,7 @@ function fillFromSnapshot() {
   if (pickedWeek) {
     els.scheduleEditor.value = JSON.stringify(pickedWeek.schedule, null, 2);
     els.scheduleStatus.value = pickedWeek.status || "auto_twitch";
+    els.scheduleImageUrl.value = pickedWeek.imageUrl || "";
   }
 
   // Subathon
@@ -219,6 +226,21 @@ function fillFromSnapshot() {
 
 function getDefaultEventPayload(eventType) {
   const now = Date.now();
+  if (eventType === "xFeedNewEntries" || eventType === "xFeedUpdate") {
+    const user = els.xFeedUser.value;
+    return {
+      user,
+      entries: [{
+        id: "mock-post-1",
+        type: "tweet",
+        author: { username: user },
+        url: `https://x.com/${user}/status/1`,
+        createdTimestamp: now,
+        content: "Local mock X feed entry",
+        media: [],
+      }],
+    };
+  }
   const defaults = {
     streamOnline: {
       isLive: true,
@@ -243,6 +265,7 @@ function getDefaultEventPayload(eventType) {
       year: Number(els.scheduleYear.value) || new Date().getUTCFullYear(),
       week: Number(els.scheduleWeek.value) || 1,
       status: els.scheduleStatus.value || "auto_twitch",
+      imageUrl: els.scheduleImageUrl.value.trim() || null,
       schedule: (() => {
         try {
           return parseJsonEditor(els.scheduleEditor, "schedule");
@@ -388,6 +411,7 @@ function bindEvents() {
   importHandler("importSubathonCurrent", "subathonCurrent");
   importHandler("importDevstreamTimes", "devstreamtimes");
   importHandler("importBlogFeed", "blogFeed");
+  importHandler("importXFeed", "xFeed", () => ({ user: els.xFeedUser.value }));
   importHandler("importScheduleWeek", "scheduleWeek", () => ({
     year: Number(els.importWeekYear.value),
     week: Number(els.importWeekWeek.value),
@@ -432,6 +456,7 @@ function bindEvents() {
     }
     els.scheduleEditor.value = JSON.stringify(week.schedule, null, 2);
     els.scheduleStatus.value = week.status || "auto_twitch";
+    els.scheduleImageUrl.value = week.imageUrl || "";
     log("Loaded week from local state");
   });
 
@@ -448,6 +473,7 @@ function bindEvents() {
           week,
           schedule,
           status: els.scheduleStatus.value || "auto_twitch",
+          imageUrl: els.scheduleImageUrl.value.trim() || null,
           setAsLatest: !!els.scheduleLatest.checked,
         }),
       });
@@ -512,6 +538,27 @@ function bindEvents() {
       log(`Deleted subathon year ${year}`);
     }).catch((e) => log(e.message, "err")),
   );
+
+  els.xFeedUser.addEventListener("change", () => {
+    els.xFeedEditor.value = JSON.stringify(state.snapshot?.state?.xFeed?.[els.xFeedUser.value] || [], null, 2);
+  });
+
+  $("saveXFeed").addEventListener("click", () =>
+    withLoading("saveXFeed", async () => {
+      const entries = parseJsonEditor(els.xFeedEditor, "X feed entries");
+      await requestJson("/api/v2/__test/x-feed", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: els.xFeedUser.value, entries }),
+      });
+      await refreshAll();
+      log(`Saved X feed for ${els.xFeedUser.value}`);
+    }).catch((e) => log(e.message, "err")),
+  );
+
+  $("exampleXFeed").addEventListener("click", () => {
+    els.xFeedEditor.value = JSON.stringify(getDefaultEventPayload("xFeedNewEntries").entries, null, 2);
+  });
 
   // WS Emit
   els.eventType.addEventListener("change", () => {

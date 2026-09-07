@@ -140,6 +140,8 @@ export class WsHub {
   getSubscriptionCounts(): Record<WsEventType, number> {
     const counts: Record<WsEventType, number> = {
       blogFeedUpdate: 0,
+      xFeedNewEntries: 0,
+      xFeedUpdate: 0,
       scheduleUpdate: 0,
       subathonUpdate: 0,
       subathonGoalUpdate: 0,

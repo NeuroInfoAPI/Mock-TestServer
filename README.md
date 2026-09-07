@@ -23,9 +23,6 @@ cd Mock-TestServer
 bun install
 ```
 
-> [!NOTE]
-> If some error accours with axios on starting the server please use `npm install` instead of `bun install`.
-
 ```bash
 bun src/index.ts
 ```
@@ -51,13 +48,17 @@ Default URLs for `neuroinfoapi-client` v2:
 import { NeuroInfoApiClient, NeuroInfoApiWebsocketClient } from "neuroinfoapi-client";
 
 const api = new NeuroInfoApiClient("mock-token", {
-  baseUrl: "http://localhost:8787/api/v2",
+  apiBaseUrl: "localhost:8787/api/v2",
+  useTls: false,
 });
 
 const ws = new NeuroInfoApiWebsocketClient("mock-token", {
-  baseUrl: "ws://localhost:8787/api/v2/ws",
-  apiBaseUrl: "http://localhost:8787/api/v2",
+  apiBaseUrl: "localhost:8787/api/v2",
+  useTls: false,
 });
+
+ws.on("xFeedNewEntries", ({ user, entries }) => console.log(user, entries));
+await ws.connect();
 ```
 
 ## Auth Behavior in Mock Mode
@@ -87,6 +88,14 @@ REST routes include (non-exhaustive):
   - `GET /api/v2/subathon` (active/current subathons)
   - `GET /api/v2/subathon/years` (returns `Record<year, name>`)
   - `GET /api/v2/subathon?year=...`
+- Blog
+  - `GET /api/v2/blog` (`raw=true` includes raw content when stored)
+- X Feed
+  - `GET /api/v2/x-feed?user=NeurosamaAI` (requires a token)
+  - Supported users: `NeurosamaAI`, `EvilNeuroAI`, `Vedal987`
+  - Missing or unsupported users return HTTP 400 with the mock error code `INVALID_USER`.
+
+Schedules include `imageUrl: string | null` in REST responses, search results, and `scheduleUpdate` events. Existing state files are migrated automatically.
 
 Additional docs/testing parity endpoint:
 
@@ -96,7 +105,7 @@ Additional docs/testing parity endpoint:
 
 The UI at `/ui` supports:
 
-- Editing Twitch, Schedule, and Subathon payloads
+- Editing Twitch, Schedule (including image URL), Subathon, and X Feed payloads
 - Emitting WS events
 - Resetting or replacing full state
 - Importing selected data from real API into local state
@@ -104,6 +113,8 @@ The UI at `/ui` supports:
 Changes are persisted to:
 
 - `src/mock-state.json`
+
+Set `NIA_TEST_STATE_DIR` to use a separate directory for `mock-state.json`. `NIA_TEST_HOST` and `NIA_TEST_PORT` override the listening address and port.
 
 ## Import From Real API
 
@@ -132,6 +143,9 @@ Supported targets:
 - `subathonYear`
 - `devstreamtimes`
 - `blogFeed`
+- `xFeed` (also pass `"user": "NeurosamaAI"`, `"EvilNeuroAI"`, or `"Vedal987"`)
+
+`PUT /api/v2/__test/x-feed` accepts `{ "user": "NeurosamaAI", "entries": [] }` and replaces that account's cached feed. Saving or importing entries emits `xFeedNewEntries` and the deprecated `xFeedUpdate` alias for post IDs absent from the previous feed. Both events carry `{ user, entries }`. Use the WS Emit panel to send arbitrary test events without changing the cached feed.
 
 ## WS Protocol (for custom clients)
 
@@ -140,6 +154,7 @@ Inbound:
 - `{"type":"addEvent","data":{"eventType":"streamOnline"}}`
 - `{"type":"removeEvent","data":{"eventType":"streamOnline"}}`
 - `{"type":"listEvents","data":{}}`
+- `{"type":"ping","data":{}}`
 
 Outbound message types:
 
@@ -149,6 +164,7 @@ Outbound message types:
 - `listEvents`
 - `event`
 - `invalid`
+- `pong`
 
 ## Internal Test Endpoints
 
@@ -160,3 +176,13 @@ The mock exposes helper endpoints under `/api/v2/__test/*` for UI and automation
 - upstream import
 
 These are intended for local development only.
+
+## Checks
+
+```bash
+bun run tsc --noEmit
+bun run tsc --project tests/tsconfig.json
+bun test
+```
+
+Integration tests start an isolated server with temporary state. To test with a local client source instead of the installed package, set `NIA_TEST_CLIENT_PATH` to its absolute `NeuroInfoAPI-Client.ts` path.

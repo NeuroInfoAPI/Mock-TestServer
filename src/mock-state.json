@@ -327,7 +327,8 @@
             "type": "offline"
           }
         ],
-        "status": "auto_twitch"
+        "status": "auto_twitch",
+        "imageUrl": null
       },
       "2026-15": {
         "year": 2026,
@@ -376,7 +377,8 @@
             "type": "offline"
           }
         ],
-        "status": "confirmed"
+        "status": "confirmed",
+        "imageUrl": null
       },
       "2026-16": {
         "year": 2026,
@@ -401,7 +403,8 @@
             "type": "offline"
           }
         ],
-        "status": "auto_twitch"
+        "status": "auto_twitch",
+        "imageUrl": null
       },
       "2026-17": {
         "year": 2026,
@@ -450,7 +453,8 @@
             "type": "normal"
           }
         ],
-        "status": "confirmed"
+        "status": "confirmed",
+        "imageUrl": null
       },
       "2026-20": {
         "year": 2026,
@@ -499,7 +503,8 @@
             "type": "offline"
           }
         ],
-        "status": "confirmed"
+        "status": "confirmed",
+        "imageUrl": null
       }
     },
     "latestKey": "2026-20",
@@ -753,5 +758,10 @@
         }
       ]
     }
+  },
+  "xFeed": {
+    "NeurosamaAI": [],
+    "EvilNeuroAI": [],
+    "Vedal987": []
   }
 }

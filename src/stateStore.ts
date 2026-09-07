@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
-import { mkdir, rename } from "node:fs/promises";
-import { BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { mkdir, readFile, rename } from "node:fs/promises";
+import { ALL_X_FEED_ACCOUNTS, BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod, XFeedAccount, XFeedEntry } from "./contracts";
 import { compareYearWeek, createDefaultMockState, deepClone, getScheduleKey, splitScheduleKey } from "./defaults";
 
 export class StateStore {
@@ -25,7 +25,7 @@ export class StateStore {
     }
 
     try {
-      const parsed = (await file.json()) as MockState;
+      const parsed = JSON.parse(await readFile(filePath, "utf8")) as MockState;
       if (!parsed || parsed.version !== 1) throw new Error("Unsupported state version");
       const sanitized = sanitizeState(parsed);
       const store = new StateStore(filePath, sanitized);
@@ -69,7 +69,7 @@ export class StateStore {
 
   upsertSchedule(schedule: ScheduleResponse, setAsLatest: boolean): void {
     const key = getScheduleKey(schedule.year, schedule.week);
-    this.state.schedule.weeks[key] = deepClone(schedule);
+    this.state.schedule.weeks[key] = deepClone({ ...schedule, imageUrl: schedule.imageUrl ?? null });
     if (setAsLatest || !this.state.schedule.latestKey) {
       this.state.schedule.latestKey = key;
     }
@@ -117,6 +117,11 @@ export class StateStore {
 
   setBlogFeed(feed: BlogFeedData): void {
     this.state.blog.feed = deepClone(feed);
+    this.bumpAndSave();
+  }
+
+  setXFeed(user: XFeedAccount, entries: XFeedEntry[]): void {
+    this.state.xFeed[user] = deepClone(entries);
     this.bumpAndSave();
   }
 
@@ -200,6 +205,10 @@ function sanitizeState(state: MockState): MockState {
 
   next.subathon.byYear = next.subathon.byYear ?? {};
   next.blog.feed = normalizeBlogFeed(next.blog.feed) ?? createDefaultMockState().blog.feed;
+  next.xFeed = next.xFeed ?? createDefaultMockState().xFeed;
+  for (const user of ALL_X_FEED_ACCOUNTS) {
+    if (!Array.isArray(next.xFeed[user])) next.xFeed[user] = [];
+  }
   next.schedule.weeks = migrateScheduleWeeks(next.schedule.weeks);
 
   return next;
@@ -232,6 +241,7 @@ function migrateScheduleWeeks(weeks: Record<string, ScheduleResponse>): Record<s
       week: schedule.week,
       schedule: schedule.schedule,
       status,
+      imageUrl: schedule.imageUrl ?? null,
     };
   }
 

@@ -69,9 +69,10 @@ function buildScheduleFromWeekStart(weekStart: Date, year: number, week: number,
     year,
     week,
     status: seed % 2 === 0 ? "confirmed" : "auto_twitch",
+    imageUrl: null,
     schedule: entries.map((entry) => ({
       day: entry.day,
-      time: weekStart.getTime() + entry.day * DAY_MS + entry.hour * 60 * 60 * 1000 + entry.minute * 60 * 1000,
+      time: weekStart.getTime() + ((entry.day + 6) % 7) * DAY_MS + entry.hour * 60 * 60 * 1000 + entry.minute * 60 * 1000,
       message: entry.message,
       type: entry.type,
     })),
@@ -235,6 +236,11 @@ export function createDefaultMockState(): MockState {
     },
     blog: {
       feed: createDefaultBlogFeed(now),
+    },
+    xFeed: {
+      NeurosamaAI: [],
+      EvilNeuroAI: [],
+      Vedal987: [],
     },
   };
 }

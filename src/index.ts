@@ -8,6 +8,7 @@ import {
   BlogFeedData,
   ConnectionData,
   ImportTarget,
+  isXFeedAccount,
   MockState,
   ScheduleResponse,
   ScheduleSearchResultItem,
@@ -16,6 +17,8 @@ import {
   TwitchStreamData,
   TwitchVod,
   WsEventType,
+  XFeedAccount,
+  XFeedEntry,
 } from "./contracts";
 import { compareYearWeek, getIsoWeekAndYear, getScheduleKey } from "./defaults";
 import { errorPayload, isApiErrorCode } from "./errors";
@@ -29,6 +32,7 @@ import {
   asSubathonData,
   asTwitchStreamData,
   asTwitchVods,
+  asXFeedEntries,
   importFromUpstream,
 } from "./upstream";
 import { WsHub } from "./wsHub";
@@ -55,6 +59,7 @@ const IMPORT_TARGETS: ImportTarget[] = [
   "subathonYear",
   "devstreamtimes",
   "blogFeed",
+  "xFeed",
 ];
 
 function getApiPath(pathname: string): string | null {
@@ -190,7 +195,7 @@ async function serveUiAsset(pathname: string): Promise<Response> {
 }
 
 async function startServer() {
-  const stateStore = await StateStore.create(SOURCE_DIR);
+  const stateStore = await StateStore.create(process.env.NIA_TEST_STATE_DIR ?? SOURCE_DIR);
   const wsHub = new WsHub();
   const tickets = new TicketStore(30_000);
 
@@ -447,6 +452,7 @@ async function startServer() {
               week: week.week,
               schedule: matchedEntries,
               status: week.status,
+              imageUrl: week.imageUrl,
             },
           });
         }
@@ -512,6 +518,18 @@ async function startServer() {
         return jsonResponse(makeBlogFeedResponse(state.blog.feed, includeRaw), 200, { "Cache-Control": "private, max-age=300" });
       }
 
+      if (path === "/x-feed" && method === "GET") {
+        const auth = requireAuthHeader(request);
+        if (!auth.ok) return auth.response!;
+
+        const user = url.searchParams.get("user");
+        if (!isXFeedAccount(user)) {
+          return jsonResponse({ error: { code: "INVALID_USER", message: "A supported X feed user is required", timestamp: Date.now(), path: url.pathname } }, 400);
+        }
+
+        return jsonResponse(stateStore.getSnapshot().xFeed[user], 200, { "Cache-Control": "private, max-age=300" });
+      }
+
       if (path === "/__test/state" && method === "GET") {
         return jsonResponse({
           state: stateStore.getSnapshot(),
@@ -565,6 +583,7 @@ async function startServer() {
           week: number;
           schedule: ScheduleResponse["schedule"];
           status?: ScheduleStatus;
+          imageUrl?: string | null;
           setAsLatest?: boolean;
         }>(request);
 
@@ -573,12 +592,15 @@ async function startServer() {
         }
 
         const status = body.status && ALL_SCHEDULE_STATUSES.includes(body.status) ? body.status : "auto_twitch";
+        if (body.imageUrl != null && typeof body.imageUrl !== "string") return jsonResponse({ error: "Invalid imageUrl" }, 400);
+        const previous = stateStore.getSnapshot().schedule.weeks[getScheduleKey(body.year, body.week)];
 
         const schedule: ScheduleResponse = {
           year: body.year,
           week: body.week,
           schedule: body.schedule,
           status,
+          imageUrl: body.imageUrl === undefined ? previous?.imageUrl ?? null : body.imageUrl,
         };
 
         stateStore.upsertSchedule(schedule, !!body.setAsLatest);
@@ -637,6 +659,23 @@ async function startServer() {
         return jsonResponse({ ok: true });
       }
 
+      if (path === "/__test/x-feed" && method === "PUT") {
+        const body = await parseJsonBody<{ user: XFeedAccount; entries: XFeedEntry[] }>(request);
+        if (!body || !isXFeedAccount(body.user)) return jsonResponse({ error: "A supported X feed user is required" }, 400);
+        const entries = asXFeedEntries(body.entries);
+        if (!entries) return jsonResponse({ error: "Invalid entries" }, 400);
+
+        const previousIds = new Set(stateStore.getSnapshot().xFeed[body.user].map((entry) => entry.id));
+        stateStore.setXFeed(body.user, entries);
+        const newEntries = entries.filter((entry) => !previousIds.has(entry.id));
+        if (newEntries.length > 0) {
+          const eventData = { user: body.user, entries: newEntries };
+          wsHub.broadcast("xFeedNewEntries", eventData);
+          wsHub.broadcast("xFeedUpdate", eventData);
+        }
+        return jsonResponse({ ok: true });
+      }
+
       if (path === "/__test/emit" && method === "POST") {
         const body = await parseJsonBody<{ eventType: WsEventType; eventData: unknown; timestamp?: number }>(request);
         if (!body || !isWsEventType(body.eventType)) return jsonResponse({ error: "Invalid eventType" }, 400);
@@ -647,7 +686,7 @@ async function startServer() {
       }
 
       if (path === "/__test/import" && method === "POST") {
-        const body = await parseJsonBody<{ target: ImportTarget; token: string; year?: number; week?: number; raw?: boolean }>(request);
+        const body = await parseJsonBody<{ target: ImportTarget; token: string; year?: number; week?: number; raw?: boolean; user?: XFeedAccount }>(request);
         if (!body || !isImportTarget(body.target) || typeof body.token !== "string") {
           return jsonResponse({ error: "Invalid payload" }, 400);
         }
@@ -658,6 +697,7 @@ async function startServer() {
           year: body.year,
           week: body.week,
           raw: body.raw,
+          user: body.user,
         });
 
         if (!result.ok) {
@@ -722,6 +762,19 @@ async function startServer() {
             wsHub.broadcast("blogFeedUpdate", feed);
             break;
           }
+          case "xFeed": {
+            const entries = asXFeedEntries(result.data);
+            if (!entries || !isXFeedAccount(body.user)) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
+            const previousIds = new Set(stateStore.getSnapshot().xFeed[body.user].map((entry) => entry.id));
+            stateStore.setXFeed(body.user, entries);
+            const newEntries = entries.filter((entry) => !previousIds.has(entry.id));
+            if (newEntries.length > 0) {
+              const eventData = { user: body.user, entries: newEntries };
+              wsHub.broadcast("xFeedNewEntries", eventData);
+              wsHub.broadcast("xFeedUpdate", eventData);
+            }
+            break;
+          }
         }
 
         return jsonResponse({ ok: true, target: body.target });
@@ -781,10 +834,10 @@ async function startServer() {
   process.on("unhandledRejection", (error) => void shutdown("unhandledRejection", error));
 
   console.log("[nia-mock] server running");
-  console.log(`[nia-mock] UI: http://localhost:${PORT}/ui`);
-  console.log(`[nia-mock] REST: http://localhost:${PORT}/api/v2`);
-  console.log(`[nia-mock] WS: ws://localhost:${PORT}/api/v2/ws`);
-  console.log(`[nia-mock] Ticket: http://localhost:${PORT}/api/v2/ws/ticket`);
+  console.log(`[nia-mock] UI: http://localhost:${server.port}/ui`);
+  console.log(`[nia-mock] REST: http://localhost:${server.port}/api/v2`);
+  console.log(`[nia-mock] WS: ws://localhost:${server.port}/api/v2/ws`);
+  console.log(`[nia-mock] Ticket: http://localhost:${server.port}/api/v2/ws/ticket`);
 }
 
 void startServer();

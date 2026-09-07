@@ -18,6 +18,8 @@ import type {
   WsEventDataMap,
   WsEventType,
   WsInvalidReason,
+  XFeedAccount,
+  XFeedEntry,
 } from "neuroinfoapi-client";
 
 export type {
@@ -40,6 +42,8 @@ export type {
   WsEventDataMap,
   WsEventType,
   WsInvalidReason,
+  XFeedAccount,
+  XFeedEntry,
 };
 
 export type ScheduleDayType = ScheduleEntry["type"];
@@ -50,6 +54,8 @@ export const ALL_SCHEDULE_DAY_TYPES = ["normal", "offline", "canceled", "TBD", "
 
 export const ALL_EVENT_TYPES: readonly WsEventType[] = [
   "blogFeedUpdate",
+  "xFeedNewEntries",
+  "xFeedUpdate",
   "scheduleUpdate",
   "subathonUpdate",
   "subathonGoalUpdate",
@@ -60,6 +66,12 @@ export const ALL_EVENT_TYPES: readonly WsEventType[] = [
   "streamRaidIncoming",
   "streamRaidOutgoing",
 ] as const;
+
+export const ALL_X_FEED_ACCOUNTS = ["NeurosamaAI", "EvilNeuroAI", "Vedal987"] as const satisfies readonly XFeedAccount[];
+
+export function isXFeedAccount(value: unknown): value is XFeedAccount {
+  return typeof value === "string" && ALL_X_FEED_ACCOUNTS.includes(value as XFeedAccount);
+}
 
 export interface MockState {
   version: 1;
@@ -79,6 +91,7 @@ export interface MockState {
   blog: {
     feed: BlogFeedData;
   };
+  xFeed: Record<XFeedAccount, XFeedEntry[]>;
 }
 
 export type ApiErrorCode =
@@ -128,4 +141,5 @@ export type ImportTarget =
   | "subathonCurrent"
   | "subathonYear"
   | "devstreamtimes"
-  | "blogFeed";
+  | "blogFeed"
+  | "xFeed";
