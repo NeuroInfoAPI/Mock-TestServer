@@ -3,6 +3,7 @@ import type {
   BlogFeedEntry,
   BlogEntryBodySection,
   ScheduleEntry,
+  ScheduleLinkedStreamInfo,
   ScheduleLatestResponse,
   ScheduleResponse,
   ScheduleSearchCursor,
@@ -10,6 +11,8 @@ import type {
   ScheduleSearchResponse,
   ScheduleStatus,
   ScheduleWeeksResponse,
+  ShopMoney,
+  ShopProduct,
   SubathonData,
   SubathonGoal,
   SubathonYearsResponse,
@@ -20,13 +23,14 @@ import type {
   WsInvalidReason,
   XFeedAccount,
   XFeedEntry,
-} from "neuroinfoapi-client";
+} from "@neuroinfoapi-client/bun";
 
 export type {
   BlogFeedData,
   BlogFeedEntry,
   BlogEntryBodySection,
   ScheduleEntry,
+  ScheduleLinkedStreamInfo,
   ScheduleLatestResponse,
   ScheduleResponse,
   ScheduleSearchCursor,
@@ -34,6 +38,8 @@ export type {
   ScheduleSearchResponse,
   ScheduleStatus,
   ScheduleWeeksResponse,
+  ShopMoney,
+  ShopProduct,
   SubathonData,
   SubathonGoal,
   SubathonYearsResponse,
@@ -53,6 +59,7 @@ export const ALL_SCHEDULE_STATUSES = ["auto_twitch", "auto_discord", "confirmed"
 export const ALL_SCHEDULE_DAY_TYPES = ["normal", "offline", "canceled", "TBD", "unknown"] as const satisfies readonly ScheduleDayType[];
 
 export const ALL_EVENT_TYPES: readonly WsEventType[] = [
+  "shopProductsUpdate",
   "blogFeedUpdate",
   "xFeedNewEntries",
   "xFeedUpdate",
@@ -63,6 +70,9 @@ export const ALL_EVENT_TYPES: readonly WsEventType[] = [
   "streamUpdate",
   "streamOffline",
   "secretneuroaccountOnline",
+  "scheduleLinkedStreamOnline",
+  "scheduleLinkedStreamUpdate",
+  "scheduleLinkedStreamOffline",
   "streamRaidIncoming",
   "streamRaidOutgoing",
 ] as const;
@@ -79,6 +89,7 @@ export interface MockState {
   twitch: {
     stream: TwitchStreamData;
     vods: TwitchVod[];
+    scheduleLinkedStreams: ScheduleLinkedStreamInfo[];
   };
   schedule: {
     weeks: Record<string, ScheduleResponse>;
@@ -92,11 +103,15 @@ export interface MockState {
     feed: BlogFeedData;
   };
   xFeed: Record<XFeedAccount, XFeedEntry[]>;
+  shop: {
+    products: ShopProduct[];
+  };
 }
 
 export type ApiErrorCode =
   | "AP1"
   | "AP3"
+  | "AP4"
   | "SC1"
   | "SC2"
   | "SC3"
@@ -107,6 +122,8 @@ export type ApiErrorCode =
   | "SB2"
   | "SB3"
   | "SB4"
+  | "SH1"
+  | "SH2"
   | "AU1"
   | "AU2"
   | "RL2"
@@ -142,4 +159,6 @@ export type ImportTarget =
   | "subathonYear"
   | "devstreamtimes"
   | "blogFeed"
-  | "xFeed";
+  | "xFeed"
+  | "scheduleLinkedStreams"
+  | "shopProducts";

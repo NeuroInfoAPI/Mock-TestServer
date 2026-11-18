@@ -1,4 +1,4 @@
-import { BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
+import { BlogFeedData, MockState, ScheduleResponse, ShopProduct, SubathonData, TwitchStreamData, TwitchVod } from "./contracts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -176,19 +176,93 @@ function createDefaultBlogFeed(now: number): BlogFeedData {
       {
         title: "Mock blog entry",
         author: "NIA Mock",
-        url: "https://neuro.appstun.net/blog/mock-entry",
+        url: "https://neuroinfoapi.dev/blog/mock-entry",
         published: now - DAY_MS,
         updated: now - DAY_MS,
         summary: "Example blog entry returned by the local mock server.",
         content: [
           {
             header: "Overview",
-            body: "This placeholder keeps the mock shape aligned with neuroinfoapi-client.",
+            body: "This placeholder keeps the mock shape aligned with @neuroinfoapi-client.",
           },
         ],
       },
     ],
   };
+}
+
+function createDefaultShopProducts(now: number): ShopProduct[] {
+  const image = {
+    url: "https://cdn.shopify.com/s/files/1/0000/0000/files/mock-neuro-plush.png",
+    altText: "Neuro-sama plush",
+    width: 1024,
+    height: 1024,
+  };
+
+  return [
+    {
+      id: "1234567890123",
+      title: "Neuro-sama Plush",
+      handle: "neuro-sama-plush",
+      url: "https://neurosama.shop/p/1234567890123",
+      description: "Neuro-sama plush (local mock product).",
+      descriptionHtml: "<p>Neuro-sama plush (local mock product).</p>",
+      vendor: "Neuro-sama",
+      productType: "Plush",
+      tags: ["mock"],
+      availableForSale: true,
+      createdAt: now - 30 * DAY_MS,
+      updatedAt: now - DAY_MS,
+      publishedAt: now - 30 * DAY_MS,
+      seo: { title: null, description: null },
+      options: [{ name: "Size", values: ["One size"] }],
+      images: [image],
+      variants: [
+        {
+          id: "1234567890456",
+          title: "One size",
+          sku: null,
+          availableForSale: true,
+          price: { amount: "29.99", currencyCode: "USD" },
+          compareAtPrice: null,
+          selectedOptions: [{ name: "Size", value: "One size" }],
+          image,
+        },
+      ],
+      collections: [{ id: "123456789", title: "Neuro-sama" }],
+      metafields: [],
+    },
+    {
+      id: "1234567890789",
+      title: "Evil Neuro Hoodie",
+      handle: "evil-neuro-hoodie",
+      url: "https://neurosama.shop/p/1234567890789",
+      description: "Evil Neuro hoodie (local mock product).",
+      descriptionHtml: "<p>Evil Neuro hoodie (local mock product).</p>",
+      vendor: "Neuro-sama",
+      productType: "Apparel",
+      tags: ["mock", "evil"],
+      availableForSale: false,
+      createdAt: now - 120 * DAY_MS,
+      updatedAt: now - 60 * DAY_MS,
+      publishedAt: now - 120 * DAY_MS,
+      seo: { title: null, description: null },
+      options: [{ name: "Size", values: ["M", "L"] }],
+      images: [],
+      variants: ["M", "L"].map((size, index) => ({
+        id: `123456789079${index}`,
+        title: size,
+        sku: `EVIL-HOODIE-${size}`,
+        availableForSale: false,
+        price: { amount: "54.99", currencyCode: "USD" },
+        compareAtPrice: { amount: "64.99", currencyCode: "USD" },
+        selectedOptions: [{ name: "Size", value: size }],
+        image: null,
+      })),
+      collections: [{ id: "123456790", title: "Evil Neuro" }],
+      metafields: [],
+    },
+  ];
 }
 
 export function createDefaultMockState(): MockState {
@@ -217,6 +291,7 @@ export function createDefaultMockState(): MockState {
     twitch: {
       stream: createDefaultStream(now),
       vods: createDefaultVods(now),
+      scheduleLinkedStreams: [],
     },
     schedule: {
       weeks: {
@@ -241,6 +316,9 @@ export function createDefaultMockState(): MockState {
       NeurosamaAI: [],
       EvilNeuroAI: [],
       Vedal987: [],
+    },
+    shop: {
+      products: createDefaultShopProducts(now),
     },
   };
 }

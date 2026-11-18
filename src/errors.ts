@@ -3,6 +3,7 @@ import { ApiErrorCode, ApiErrorPayload } from "./contracts";
 const MESSAGES: Record<ApiErrorCode, string> = {
   AP1: "Internal server error",
   AP3: "404 Not Found",
+  AP4: "Invalid query parameters",
   SC1: "No schedule found in the database for the given week & year.",
   SC2: "Invalid year or week parameter",
   SC3: "Missing search query parameter",
@@ -13,6 +14,8 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   SB2: "Year parameter is required",
   SB3: "Invalid year parameter or year cannot be in the future",
   SB4: "No subathon found for the specified year",
+  SH1: "No shop product found with the given id.",
+  SH2: "Shop product data is temporarily unavailable. Please try again later.",
   AU1: "Missing or invalid authorization header",
   AU2: "Invalid or expired API token",
   RL2: "Too many requests from this API token",

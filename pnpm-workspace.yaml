@@ -1,0 +1,3 @@
+minimumReleaseAgeExclude:
+  - '@neuroinfoapi-client/bun@2.8.0'
+  - '@neuroinfoapi-client/core@2.8.0'

@@ -23,6 +23,8 @@ const els = {
 
   streamEditor: $("streamEditor"),
   vodsEditor: $("vodsEditor"),
+  linkedStreamsEditor: $("linkedStreamsEditor"),
+  shopEditor: $("shopEditor"),
 
   scheduleYear: $("scheduleYear"),
   scheduleWeek: $("scheduleWeek"),
@@ -161,6 +163,8 @@ function fillFromSnapshot() {
       blogEntries: snap.blog?.feed?.entries?.length ?? 0,
       blogLastUpdated: snap.blog?.feed?.lastUpdated ?? null,
       xFeedEntries: Object.fromEntries(Object.entries(snap.xFeed).map(([user, entries]) => [user, entries.length])),
+      scheduleLinkedStreams: snap.twitch.scheduleLinkedStreams?.length ?? 0,
+      shopProducts: snap.shop?.products?.length ?? 0,
     },
     null,
     2,
@@ -169,6 +173,8 @@ function fillFromSnapshot() {
   // Twitch editors
   els.streamEditor.value = JSON.stringify(snap.twitch.stream, null, 2);
   els.vodsEditor.value = JSON.stringify(snap.twitch.vods, null, 2);
+  els.linkedStreamsEditor.value = JSON.stringify(snap.twitch.scheduleLinkedStreams || [], null, 2);
+  els.shopEditor.value = JSON.stringify(snap.shop?.products || [], null, 2);
   els.xFeedEditor.value = JSON.stringify(snap.xFeed[els.xFeedUser.value] || [], null, 2);
 
   // Devstream
@@ -224,8 +230,54 @@ function fillFromSnapshot() {
   }
 }
 
+function getExampleLinkedStream(status = "live") {
+  const now = Date.now();
+  const stream =
+    status === "live"
+      ? {
+          isLive: true,
+          id: "secret-stream-id",
+          title: "Evil Stream",
+          game: { id: "509658", name: "Just Chatting" },
+          language: "en",
+          tags: ["mock"],
+          isMature: false,
+          viewerCount: 420,
+          startedAt: now - 10 * 60000,
+          thumbnailUrl: "https://static-cdn.jtvnw.net/previews-ttv/live_user_secretneuroaccount-{width}x{height}.jpg",
+        }
+      : { isLive: false };
+  return {
+    status,
+    channel: { id: "1234567890", name: "secretneuroaccount", displayName: "secretneuroaccount" },
+    linkType: "on",
+    scheduleEntry: {
+      day: new Date(now).getUTCDay() || 7,
+      time: now - 15 * 60000,
+      message: "(on [secretneuroaccount](<https://twitch.tv/secretneuroaccount>)) Evil Stream",
+      type: "normal",
+    },
+    stream,
+  };
+}
+
 function getDefaultEventPayload(eventType) {
   const now = Date.now();
+  if (eventType === "scheduleLinkedStreamOnline") {
+    const { status, ...rest } = getExampleLinkedStream("live");
+    return { trigger: "streamStart", ...rest };
+  }
+  if (eventType === "scheduleLinkedStreamUpdate") {
+    const { status, stream, ...rest } = getExampleLinkedStream("live");
+    return { ...rest, stream: { title: "Evil Stream (updated)", game: stream.game, language: stream.language, isMature: stream.isMature } };
+  }
+  if (eventType === "scheduleLinkedStreamOffline") {
+    const { status, ...rest } = getExampleLinkedStream("waiting");
+    return { reason: "streamEnd", ...rest };
+  }
+  if (eventType === "shopProductsUpdate") {
+    return { products: state.snapshot?.state?.shop?.products || [] };
+  }
   if (eventType === "xFeedNewEntries" || eventType === "xFeedUpdate") {
     const user = els.xFeedUser.value;
     return {
@@ -317,7 +369,7 @@ function getDefaultEventPayload(eventType) {
         {
           title: "Mock blog entry",
           author: "NIA Mock",
-          url: "https://neuro.appstun.net/blog/mock-entry",
+          url: "https://neuroinfoapi.dev/blog/mock-entry",
           published: now - 86400000,
           updated: now - 86400000,
           summary: "Example blog entry returned by the local mock server.",
@@ -411,6 +463,9 @@ function bindEvents() {
   importHandler("importSubathonCurrent", "subathonCurrent");
   importHandler("importDevstreamTimes", "devstreamtimes");
   importHandler("importBlogFeed", "blogFeed");
+  importHandler("importScheduleLinkedStreams", "scheduleLinkedStreams");
+  importHandler("importShopProducts", "shopProducts");
+  importHandler("importShopProductsTab", "shopProducts");
   importHandler("importXFeed", "xFeed", () => ({ user: els.xFeedUser.value }));
   importHandler("importScheduleWeek", "scheduleWeek", () => ({
     year: Number(els.importWeekYear.value),
@@ -444,6 +499,37 @@ function bindEvents() {
       });
       await refreshAll();
       log("Saved vod list");
+    }).catch((e) => log(e.message, "err")),
+  );
+
+  $("exampleLinkedStreams").addEventListener("click", () => {
+    els.linkedStreamsEditor.value = JSON.stringify([getExampleLinkedStream("live")], null, 2);
+  });
+
+  $("saveLinkedStreams").addEventListener("click", () =>
+    withLoading("saveLinkedStreams", async () => {
+      const payload = parseJsonEditor(els.linkedStreamsEditor, "schedule-linked streams");
+      await requestJson("/api/v2/__test/twitch/scheduleLinkedStreams", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await refreshAll();
+      log("Saved schedule-linked streams");
+    }).catch((e) => log(e.message, "err")),
+  );
+
+  // Shop
+  $("saveShop").addEventListener("click", () =>
+    withLoading("saveShop", async () => {
+      const payload = parseJsonEditor(els.shopEditor, "shop products");
+      await requestJson("/api/v2/__test/shop/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await refreshAll();
+      log("Saved shop products");
     }).catch((e) => log(e.message, "err")),
   );
 

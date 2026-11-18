@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      neuroinfoapi-client:
-        specifier: 2.6.0
-        version: 2.6.0
+      '@neuroinfoapi-client/bun':
+        specifier: 2.8.0
+        version: 2.8.0
     devDependencies:
       '@types/bun':
         specifier: ^1.4.1
@@ -23,6 +23,12 @@ importers:
         version: 7.0.2
 
 packages:
+
+  '@neuroinfoapi-client/bun@2.8.0':
+    resolution: {integrity: sha512-FHjuarjkztzFhxGozhNidv2H2q43WMLXh3eXujSkzs/tNGkxKAvrLlGtG+/65bM1esBXsknaTbiyC2QeONtsng==}
+
+  '@neuroinfoapi-client/core@2.8.0':
+    resolution: {integrity: sha512-Ei7EU4opTZG9k5tK5RtdFWvQzSF3+0v8L07Ux8rLcRGypIkFbzR11QNfUBFKyjB9PuyRZpj7pAHQPFUwKSK1SA==}
 
   '@types/bun@1.4.1':
     resolution: {integrity: sha512-0AVGiTXGajf1rgKom3N+c5L7CBxuoyyv1i44M0nX4UDK0G/fnRAMiri93nHuVPIb429KKtAgj7HatVmmOjeQLA==}
@@ -153,9 +159,6 @@ packages:
   bun-types@1.4.1:
     resolution: {integrity: sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA==}
 
-  neuroinfoapi-client@2.6.0:
-    resolution: {integrity: sha512-/iCwQ36lDk1iJXawuHtQKFOXwPM6D24qvYmDa6kKuDuSzYf9KI/KefNHpBL9pPG26+9mi14ssq523k7pGjJ1mg==}
-
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
@@ -165,6 +168,12 @@ packages:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
 snapshots:
+
+  '@neuroinfoapi-client/bun@2.8.0':
+    dependencies:
+      '@neuroinfoapi-client/core': 2.8.0
+
+  '@neuroinfoapi-client/core@2.8.0': {}
 
   '@types/bun@1.4.1':
     dependencies:
@@ -237,8 +246,6 @@ snapshots:
   bun-types@1.4.1:
     dependencies:
       '@types/node': 26.4.1
-
-  neuroinfoapi-client@2.6.0: {}
 
   typescript@7.0.2:
     optionalDependencies:

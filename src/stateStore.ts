@@ -1,6 +1,18 @@
 import { dirname, join } from "node:path";
 import { mkdir, readFile, rename } from "node:fs/promises";
-import { ALL_X_FEED_ACCOUNTS, BlogFeedData, MockState, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod, XFeedAccount, XFeedEntry } from "./contracts";
+import {
+  ALL_X_FEED_ACCOUNTS,
+  BlogFeedData,
+  MockState,
+  ScheduleLinkedStreamInfo,
+  ScheduleResponse,
+  ShopProduct,
+  SubathonData,
+  TwitchStreamData,
+  TwitchVod,
+  XFeedAccount,
+  XFeedEntry,
+} from "./contracts";
 import { compareYearWeek, createDefaultMockState, deepClone, getScheduleKey, splitScheduleKey } from "./defaults";
 
 export class StateStore {
@@ -64,6 +76,16 @@ export class StateStore {
 
   setVods(vods: TwitchVod[]): void {
     this.state.twitch.vods = deepClone(vods);
+    this.bumpAndSave();
+  }
+
+  setScheduleLinkedStreams(streams: ScheduleLinkedStreamInfo[]): void {
+    this.state.twitch.scheduleLinkedStreams = deepClone(streams);
+    this.bumpAndSave();
+  }
+
+  setShopProducts(products: ShopProduct[]): void {
+    this.state.shop.products = deepClone(products);
     this.bumpAndSave();
   }
 
@@ -195,9 +217,13 @@ function sanitizeState(state: MockState): MockState {
   if (!next.blog) {
     next.blog = createDefaultMockState().blog;
   }
+  if (!next.shop || !Array.isArray(next.shop.products)) {
+    next.shop = createDefaultMockState().shop;
+  }
 
   next.twitch.stream = next.twitch.stream ?? { isLive: false };
   next.twitch.vods = Array.isArray(next.twitch.vods) ? next.twitch.vods : [];
+  next.twitch.scheduleLinkedStreams = Array.isArray(next.twitch.scheduleLinkedStreams) ? next.twitch.scheduleLinkedStreams : [];
 
   next.schedule.weeks = next.schedule.weeks ?? {};
   next.schedule.latestKey = next.schedule.latestKey ?? null;

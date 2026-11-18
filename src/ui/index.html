@@ -69,6 +69,13 @@
             Subathon
           </button>
           <button data-tab="xFeed">X Feed</button>
+          <button data-tab="shop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+              <path d="M3 6h18M16 10a4 4 0 01-8 0" />
+            </svg>
+            Shop
+          </button>
           <button data-tab="events">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
@@ -131,6 +138,8 @@
                 <button id="importSubathonCurrent" class="import-btn" data-icon="★">Current subathon</button>
                 <button id="importDevstreamTimes" class="import-btn" data-icon="◷">Devstream times</button>
                 <button id="importBlogFeed" class="import-btn" data-icon="✎">Blog feed</button>
+                <button id="importScheduleLinkedStreams" class="import-btn" data-icon="⇄">Linked streams</button>
+                <button id="importShopProducts" class="import-btn" data-icon="▣">Shop products</button>
               </div>
               <div class="section-label" style="margin-top: 16px">Import specific</div>
               <div class="inline-import">
@@ -177,6 +186,15 @@
                 <button id="saveVods" class="btn-action">Save vods</button>
               </div>
             </div>
+          </div>
+          <div class="editor-head" style="margin-top: 16px">
+            <span class="section-label">Schedule-linked streams</span>
+            <code class="endpoint">GET /api/v2/twitch/scheduleLinkedStreams</code>
+          </div>
+          <textarea id="linkedStreamsEditor" class="editor" spellcheck="false"></textarea>
+          <div class="editor-foot">
+            <button id="exampleLinkedStreams" class="btn-sm">Load example</button>
+            <button id="saveLinkedStreams" class="btn-action">Save linked streams</button>
           </div>
         </section>
 
@@ -280,6 +298,25 @@
           <textarea id="xFeedEditor" class="editor" spellcheck="false"></textarea>
           <div class="editor-foot">
             <button id="saveXFeed" class="btn-action">Save feed</button>
+          </div>
+        </section>
+
+        <!-- ═══ Shop ═══ -->
+        <section class="panel" data-panel="shop">
+          <div class="panel-head">
+            <h2>Shop</h2>
+            <p>Edit the shop catalog. Saving a changed catalog also emits shopProductsUpdate.</p>
+          </div>
+          <div class="editor-head">
+            <span class="section-label">Products</span>
+            <code class="endpoint">GET /api/v2/shop/products · /shop/product?id=...</code>
+          </div>
+          <div class="toolbar">
+            <button id="importShopProductsTab" class="btn-sm">Import from real API</button>
+          </div>
+          <textarea id="shopEditor" class="editor" spellcheck="false"></textarea>
+          <div class="editor-foot">
+            <button id="saveShop" class="btn-action">Save products</button>
           </div>
         </section>
 

@@ -1,6 +1,6 @@
 {
   "name": "nia-mock-test-server",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "main": "src/index.ts",
   "author": "Appstun",
   "license": "MIT",
@@ -13,8 +13,8 @@
     "@types/node": "^26.4.1",
     "typescript": "^7.0.2"
   },
+  "private": true,
   "dependencies": {
-    "neuroinfoapi-client": "2.6.0"
-  },
-  "private": true
+    "@neuroinfoapi-client/bun": "2.8.0"
+  }
 }

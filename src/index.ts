@@ -12,6 +12,8 @@ import {
   MockState,
   ScheduleResponse,
   ScheduleSearchResultItem,
+  ShopMoney,
+  ShopProduct,
   ScheduleStatus,
   SubathonData,
   TwitchStreamData,
@@ -27,6 +29,8 @@ import { TicketStore } from "./tickets";
 import {
   asNumberArray,
   asBlogFeedData,
+  asScheduleLinkedStreams,
+  asShopProducts,
   asScheduleResponse,
   asSubathonArray,
   asSubathonData,
@@ -60,7 +64,22 @@ const IMPORT_TARGETS: ImportTarget[] = [
   "devstreamtimes",
   "blogFeed",
   "xFeed",
+  "scheduleLinkedStreams",
+  "shopProducts",
 ];
+
+/** Static mock exchange rates relative to USD. Unknown currencies keep their original prices, like the real API. */
+const MOCK_USD_RATES: Record<string, number> = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+  JPY: 151.5,
+  CAD: 1.37,
+  AUD: 1.52,
+  CHF: 0.88,
+  SEK: 10.6,
+  PLN: 3.95,
+};
 
 function getApiPath(pathname: string): string | null {
   const match = pathname.match(/^\/api\/v2(\/.*)$/);
@@ -161,6 +180,47 @@ function makeBlogFeedResponse(feed: BlogFeedData, includeRaw: boolean): BlogFeed
     ...feed,
     entries: feed.entries.map(({ rawContent, ...entry }) => entry),
   };
+}
+
+function hasRepeatedParam(url: URL, ...names: string[]): boolean {
+  return names.some((name) => url.searchParams.getAll(name).length > 1);
+}
+
+function convertMoney(money: ShopMoney, targetCurrency: string): ShopMoney {
+  const fromRate = MOCK_USD_RATES[money.currencyCode];
+  const toRate = MOCK_USD_RATES[targetCurrency];
+  const amount = Number.parseFloat(money.amount);
+  if (fromRate == null || toRate == null || !Number.isFinite(amount)) return money;
+  if (money.currencyCode === targetCurrency) return money;
+
+  const digits = new Intl.NumberFormat("en", { style: "currency", currency: targetCurrency }).resolvedOptions().maximumFractionDigits ?? 2;
+  return { amount: ((amount / fromRate) * toRate).toFixed(digits), currencyCode: targetCurrency };
+}
+
+function convertShopProduct(product: ShopProduct, currency: string | null): ShopProduct {
+  if (!currency) return product;
+  return {
+    ...product,
+    variants: product.variants.map((variant) => ({
+      ...variant,
+      price: convertMoney(variant.price, currency),
+      compareAtPrice: variant.compareAtPrice ? convertMoney(variant.compareAtPrice, currency) : null,
+    })),
+  };
+}
+
+/** Parses the shop `currency` query: trimmed + uppercased, max 32 chars. Returns `undefined` when invalid. */
+function parseShopCurrency(url: URL): string | null | undefined {
+  const raw = url.searchParams.get("currency");
+  if (raw == null) return null;
+  const trimmed = raw.trim();
+  if (trimmed.length > 32) return undefined;
+  return trimmed.length > 0 ? trimmed.toUpperCase() : null;
+}
+
+function broadcastShopProductsIfChanged(wsHub: WsHub, previous: ShopProduct[], next: ShopProduct[]): void {
+  if (JSON.stringify(previous) === JSON.stringify(next)) return;
+  wsHub.broadcast("shopProductsUpdate", { products: next });
 }
 
 async function serveUiAsset(pathname: string): Promise<Response> {
@@ -280,7 +340,7 @@ async function startServer() {
             versions: {
               v2: {
                 status: "current",
-                docsUrl: "https://neuro.appstun.net/api/docs",
+                docsUrl: "https://neuroinfoapi.dev/api/docs",
               },
             },
           },
@@ -304,6 +364,11 @@ async function startServer() {
       if (path === "/twitch/stream" && method === "GET") {
         const state = stateStore.getSnapshot();
         return jsonResponse(state.twitch.stream, 200, { "Cache-Control": "public, max-age=30" });
+      }
+
+      if (path === "/twitch/scheduleLinkedStreams" && method === "GET") {
+        const state = stateStore.getSnapshot();
+        return jsonResponse(state.twitch.scheduleLinkedStreams, 200, { "Cache-Control": "public, max-age=5" });
       }
 
       if (path === "/twitch/vods" && method === "GET") {
@@ -530,6 +595,29 @@ async function startServer() {
         return jsonResponse(stateStore.getSnapshot().xFeed[user], 200, { "Cache-Control": "private, max-age=300" });
       }
 
+      if ((path === "/shop/products" || path === "/shop/product") && method === "GET") {
+        const auth = requireAuthHeader(request);
+        if (!auth.ok) return auth.response!;
+
+        const single = path === "/shop/product";
+        const noStore = { "Cache-Control": "no-store" };
+        if (hasRepeatedParam(url, "currency", "id")) return jsonResponse(errorPayload("AP4", url.pathname), 400, noStore);
+
+        const currency = parseShopCurrency(url);
+        if (currency === undefined) return jsonResponse(errorPayload("AP4", url.pathname), 400, noStore);
+
+        const products = stateStore.getSnapshot().shop.products;
+        const cache = { "Cache-Control": "private, max-age=30" };
+        if (!single) return jsonResponse(products.map((product) => convertShopProduct(product, currency)), 200, cache);
+
+        const id = url.searchParams.get("id") ?? "";
+        if (!/^\d{1,20}$/.test(id)) return jsonResponse(errorPayload("AP4", url.pathname), 400, noStore);
+
+        const product = products.find((entry) => entry.id === id);
+        if (!product) return jsonResponse(errorPayload("SH1", url.pathname), 404, noStore);
+        return jsonResponse(convertShopProduct(product, currency), 200, cache);
+      }
+
       if (path === "/__test/state" && method === "GET") {
         return jsonResponse({
           state: stateStore.getSnapshot(),
@@ -574,6 +662,24 @@ async function startServer() {
         if (!Array.isArray(body)) return jsonResponse({ error: "Invalid payload" }, 400);
 
         stateStore.setVods(body);
+        return jsonResponse({ ok: true });
+      }
+
+      if (path === "/__test/twitch/scheduleLinkedStreams" && method === "PUT") {
+        const streams = asScheduleLinkedStreams(await parseJsonBody<unknown>(request));
+        if (!streams) return jsonResponse({ error: "Invalid payload" }, 400);
+
+        stateStore.setScheduleLinkedStreams(streams);
+        return jsonResponse({ ok: true });
+      }
+
+      if (path === "/__test/shop/products" && method === "PUT") {
+        const products = asShopProducts(await parseJsonBody<unknown>(request));
+        if (!products) return jsonResponse({ error: "Invalid payload" }, 400);
+
+        const previous = stateStore.getSnapshot().shop.products;
+        stateStore.setShopProducts(products);
+        broadcastShopProductsIfChanged(wsHub, previous, products);
         return jsonResponse({ ok: true });
       }
 
@@ -773,6 +879,20 @@ async function startServer() {
               wsHub.broadcast("xFeedNewEntries", eventData);
               wsHub.broadcast("xFeedUpdate", eventData);
             }
+            break;
+          }
+          case "scheduleLinkedStreams": {
+            const streams = asScheduleLinkedStreams(result.data);
+            if (!streams) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
+            stateStore.setScheduleLinkedStreams(streams);
+            break;
+          }
+          case "shopProducts": {
+            const products = asShopProducts(result.data);
+            if (!products) return jsonResponse({ error: "Unexpected upstream payload" }, 502);
+            const previous = stateStore.getSnapshot().shop.products;
+            stateStore.setShopProducts(products);
+            broadcastShopProductsIfChanged(wsHub, previous, products);
             break;
           }
         }

@@ -138,20 +138,7 @@ export class WsHub {
   }
 
   getSubscriptionCounts(): Record<WsEventType, number> {
-    const counts: Record<WsEventType, number> = {
-      blogFeedUpdate: 0,
-      xFeedNewEntries: 0,
-      xFeedUpdate: 0,
-      scheduleUpdate: 0,
-      subathonUpdate: 0,
-      subathonGoalUpdate: 0,
-      streamOnline: 0,
-      streamUpdate: 0,
-      streamOffline: 0,
-      secretneuroaccountOnline: 0,
-      streamRaidIncoming: 0,
-      streamRaidOutgoing: 0,
-    };
+    const counts = Object.fromEntries(ALL_EVENT_TYPES.map((eventType) => [eventType, 0])) as Record<WsEventType, number>;
 
     for (const ws of this.connections) {
       for (const eventType of ALL_EVENT_TYPES) {

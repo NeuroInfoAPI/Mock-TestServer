@@ -8,7 +8,7 @@ This project now covers:
 - WebSocket endpoint + ticket auth flow (`/api/v2/ws`, `/api/v2/ws/ticket`)
 - Browser UI for editing state and emitting events (`/ui`)
 - JSON persistence (`src/mock-state.json`)
-- Importing real data from upstream NeuroInfoApi v2 via `neuroinfoapi-client`
+- Importing real data from upstream NeuroInfoApi v2 (`neuroinfoapi.dev`) via `@neuroinfoapi-client/bun`
 
 ## Quick Start
 
@@ -33,7 +33,7 @@ Alternative script:
 bun run run
 ```
 
-Default URLs for `neuroinfoapi-client` v2:
+Default URLs for the NeuroInfoAPI client v2:
 
 - UI: `http://localhost:8787/ui`
 - Health: `http://localhost:8787/health`
@@ -42,10 +42,10 @@ Default URLs for `neuroinfoapi-client` v2:
 - Ticket endpoint: `http://localhost:8787/api/v2/ws/ticket`
 
 
-`neuroinfoapi-client` setup example:
+Client setup example. The old `neuroinfoapi-client` package is deprecated; use `@neuroinfoapi-client/bun`, `@neuroinfoapi-client/node`, or `@neuroinfoapi-client/native` (all 2.8.0+):
 
 ```ts
-import { NeuroInfoApiClient, NeuroInfoApiWebsocketClient } from "neuroinfoapi-client";
+import { NeuroInfoApiClient, NeuroInfoApiWebsocketClient } from "@neuroinfoapi-client/bun";
 
 const api = new NeuroInfoApiClient("mock-token", {
   apiBaseUrl: "localhost:8787/api/v2",
@@ -58,8 +58,11 @@ const ws = new NeuroInfoApiWebsocketClient("mock-token", {
 });
 
 ws.on("xFeedNewEntries", ({ user, entries }) => console.log(user, entries));
+ws.on("shopProductsUpdate", ({ products }) => console.log(products.length));
 await ws.connect();
 ```
+
+The Bun and Node clients authenticate WS connections with the `Authorization` header by default and monitor heartbeats through server protocol pings (90-second timeout). The mock sends protocol pings automatically, so they stay connected. The Native client still uses ticket auth and JSON `ping`/`pong`.
 
 ## Auth Behavior in Mock Mode
 
@@ -76,6 +79,7 @@ REST routes include (non-exhaustive):
 
 - Twitch
   - `GET /api/v2/twitch/stream`
+  - `GET /api/v2/twitch/scheduleLinkedStreams` (public; empty by default)
   - `GET /api/v2/twitch/vods`
   - `GET /api/v2/twitch/vod?id=...` (`streamId` is also accepted)
 - Schedule
@@ -94,6 +98,11 @@ REST routes include (non-exhaustive):
   - `GET /api/v2/x-feed?user=NeurosamaAI` (requires a token)
   - Supported users: `NeurosamaAI`, `EvilNeuroAI`, `Vedal987`
   - Missing or unsupported users return HTTP 400 with the mock error code `INVALID_USER`.
+- Shop (requires a token)
+  - `GET /api/v2/shop/products` (`currency` optional)
+  - `GET /api/v2/shop/product?id=...` (`currency` optional)
+  - Invalid or repeated parameters return `AP4`; unknown product IDs return `SH1`.
+  - `currency` is trimmed and uppercased. The mock converts with static rates for `USD`, `EUR`, `GBP`, `JPY`, `CAD`, `AUD`, `CHF`, `SEK`, and `PLN`. Other currencies keep their original prices, like the real API.
 
 Schedules include `imageUrl: string | null` in REST responses, search results, and `scheduleUpdate` events. Existing state files are migrated automatically.
 
@@ -105,7 +114,7 @@ Additional docs/testing parity endpoint:
 
 The UI at `/ui` supports:
 
-- Editing Twitch, Schedule (including image URL), Subathon, and X Feed payloads
+- Editing Twitch (including schedule-linked streams), Schedule (including image URL), Subathon, X Feed, and Shop payloads
 - Emitting WS events
 - Resetting or replacing full state
 - Importing selected data from real API into local state
@@ -144,8 +153,14 @@ Supported targets:
 - `devstreamtimes`
 - `blogFeed`
 - `xFeed` (also pass `"user": "NeurosamaAI"`, `"EvilNeuroAI"`, or `"Vedal987"`)
+- `scheduleLinkedStreams`
+- `shopProducts`
 
 `PUT /api/v2/__test/x-feed` accepts `{ "user": "NeurosamaAI", "entries": [] }` and replaces that account's cached feed. Saving or importing entries emits `xFeedNewEntries` and the deprecated `xFeedUpdate` alias for post IDs absent from the previous feed. Both events carry `{ user, entries }`. Use the WS Emit panel to send arbitrary test events without changing the cached feed.
+
+`PUT /api/v2/__test/twitch/scheduleLinkedStreams` replaces the schedule-linked streams list. It emits no events; use the WS Emit panel for `scheduleLinkedStreamOnline`, `scheduleLinkedStreamUpdate`, and `scheduleLinkedStreamOffline`.
+
+`PUT /api/v2/__test/shop/products` replaces the shop catalog. Saving or importing a changed catalog emits `shopProductsUpdate` with `{ products }`.
 
 ## WS Protocol (for custom clients)
 
@@ -171,7 +186,7 @@ Outbound message types:
 The mock exposes helper endpoints under `/api/v2/__test/*` for UI and automation. Helpers include:
 
 - state read/write/reset
-- Twitch/Schedule/Subathon upserts
+- Twitch/Schedule/Subathon/Shop upserts
 - event emission
 - upstream import
 

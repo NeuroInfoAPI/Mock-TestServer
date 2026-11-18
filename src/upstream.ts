@@ -1,7 +1,19 @@
-import { NeuroInfoApiClient } from "neuroinfoapi-client";
-import { BlogFeedData, ImportTarget, isXFeedAccount, ScheduleResponse, SubathonData, TwitchStreamData, TwitchVod, XFeedAccount, XFeedEntry } from "./contracts";
+import { NeuroInfoApiClient } from "@neuroinfoapi-client/bun";
+import {
+  BlogFeedData,
+  ImportTarget,
+  isXFeedAccount,
+  ScheduleLinkedStreamInfo,
+  ScheduleResponse,
+  ShopProduct,
+  SubathonData,
+  TwitchStreamData,
+  TwitchVod,
+  XFeedAccount,
+  XFeedEntry,
+} from "./contracts";
 
-const API_BASE_URL = "neuro.appstun.net/api/v2";
+const API_BASE_URL = "neuroinfoapi.dev/api/v2";
 
 export type ImportRequest = {
   target: ImportTarget;
@@ -116,6 +128,12 @@ export async function importFromUpstream(input: ImportRequest): Promise<ImportRe
       if (!isXFeedAccount(input.user)) return { ok: false, status: 400, details: null, message: "A supported X feed user is required" };
       return callWithClient(input.token, (client) => client.getXFeed(input.user!));
 
+    case "scheduleLinkedStreams":
+      return callWithClient(null, (client) => client.getScheduleLinkedStreams());
+
+    case "shopProducts":
+      return callWithClient(input.token, (client) => client.getShopProducts());
+
     default:
       return {
         ok: false,
@@ -171,4 +189,27 @@ export function asXFeedEntries(value: unknown): XFeedEntry[] | null {
     if (!Number.isFinite(entry.createdTimestamp) || !Array.isArray(entry.media)) return null;
   }
   return value as XFeedEntry[];
+}
+
+export function asScheduleLinkedStreams(value: unknown): ScheduleLinkedStreamInfo[] | null {
+  if (!Array.isArray(value)) return null;
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object") return null;
+    if (entry.status !== "live" && entry.status !== "waiting") return null;
+    if (entry.linkType !== "on" && entry.linkType !== "collab") return null;
+    if (typeof entry.channel?.id !== "string" || typeof entry.channel?.name !== "string") return null;
+    if (!entry.scheduleEntry || typeof entry.scheduleEntry !== "object") return null;
+    if (typeof entry.stream?.isLive !== "boolean") return null;
+  }
+  return value as ScheduleLinkedStreamInfo[];
+}
+
+export function asShopProducts(value: unknown): ShopProduct[] | null {
+  if (!Array.isArray(value)) return null;
+  for (const product of value) {
+    if (!product || typeof product !== "object") return null;
+    if (typeof product.id !== "string" || !/^\d{1,20}$/.test(product.id)) return null;
+    if (typeof product.title !== "string" || !Array.isArray(product.variants)) return null;
+  }
+  return value as ShopProduct[];
 }
